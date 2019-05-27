@@ -12,9 +12,9 @@ execution_context::~execution_context() {
   this->destroy();
 }
 
-void execution_context::shutdown() { service_registry_->shutdown(); }
+void execution_context::shutdown() { service_registry_->shutdown_services(); }
 
-void execution_context::destroy() { service_registry_->destroy(); }
+void execution_context::destroy() { service_registry_->destroy_services(); }
 
 }  // namespace asio
 }  // namespace boost

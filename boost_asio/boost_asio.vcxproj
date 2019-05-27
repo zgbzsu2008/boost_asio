@@ -76,21 +76,30 @@
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
     <ClInclude Include="call_stack.hpp" />
+    <ClInclude Include="epoll_reactor.hpp" />
+    <ClInclude Include="event.hpp" />
     <ClInclude Include="execution_context.hpp" />
+    <ClInclude Include="executor_op.hpp" />
+    <ClInclude Include="fenced_block.hpp" />
     <ClInclude Include="io_context.hpp" />
     <ClInclude Include="noncopyable.hpp" />
     <ClInclude Include="op_queue.hpp" />
+    <ClInclude Include="recycling_allocator.hpp" />
     <ClInclude Include="scheduler.hpp" />
+    <ClInclude Include="scheduler_operation.hpp" />
     <ClInclude Include="scheduler_thread_info.hpp" />
-    <ClInclude Include="service.hpp" />
+    <ClInclude Include="select_interrupter.hpp" />
     <ClInclude Include="service_registry.hpp" />
     <ClInclude Include="thread_context.hpp" />
     <ClInclude Include="thread_info_base.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="epoll_reactor.cc" />
     <ClCompile Include="execution_context.cc" />
     <ClCompile Include="io_context.cc" />
+    <ClCompile Include="main.cc" />
     <ClCompile Include="scheduler.cc" />
+    <ClCompile Include="select_interrupter.cc" />
     <ClCompile Include="service_registry.cc" />
   </ItemGroup>
   <ItemDefinitionGroup />
