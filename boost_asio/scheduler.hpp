@@ -4,11 +4,12 @@
 #include <atomic>
 #include <mutex>
 
+#include "channel.h"
+#include "event.hpp"
 #include "execution_context.hpp"
+#include "scheduler_operation.hpp"
 #include "scheduler_thread_info.hpp"
 #include "thread_context.hpp"
-#include "scheduler_operation.hpp"
-#include "event.hpp"
 
 namespace boost {
 namespace asio {
@@ -27,6 +28,7 @@ class scheduler : public execution_context_service_base<scheduler>,
   ~scheduler();
 
   void shutdown();
+  void init_task();
 
   std::size_t run(std::error_code& ec);
   std::size_t do_run_one(std::unique_lock<std::mutex>& lock,
@@ -44,9 +46,17 @@ class scheduler : public execution_context_service_base<scheduler>,
     }
   }
 
- private:
+  bool can_dispatch() { return thread_call_stack::contains(this) != 0; }
+  void do_dispatch(operation* op);
 
+  void post_immediate_completion(operation* op, bool is_continuation);
+  void post_deferred_completion(operation* op);
+  void post_deferred_completions(op_queue<operation>& ops);
+  void abandon_operations(op_queue<operation>& ops);
+
+ private:
   void stop_all_threads(std::unique_lock<std::mutex>& lock);
+  void wake_one_thread_and_unlock(std::unique_lock<std::mutex>& lock);
 
   struct task_cleanup;
   friend struct task_cleanup;

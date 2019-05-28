@@ -36,7 +36,7 @@ class io_context::service : public execution_context::service
   service(io_context& owner) : execution_context::service(owner) {}
   virtual ~service() {}
 
-  static const std::string key() { return "io_context::service"; }
+  static std::string key() { return "io_context::service"; }
 
   io_context& get_io_context() { return static_cast<io_context&>(context()); }
 
@@ -52,7 +52,7 @@ class io_context_service_base : public io_context::service
  public:
   io_context_service_base(io_context& io) : io_context::service(io) {}
 
-  static const std::string& key() { return typeid(Type).name(); }
+  static std::string key() { return typeid(Type).name(); }
 };
 
 }  // namespace detail

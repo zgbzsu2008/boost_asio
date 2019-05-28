@@ -84,6 +84,7 @@
     <ClInclude Include="io_context.hpp" />
     <ClInclude Include="noncopyable.hpp" />
     <ClInclude Include="op_queue.hpp" />
+    <ClInclude Include="reactor_op.hpp" />
     <ClInclude Include="recycling_allocator.hpp" />
     <ClInclude Include="scheduler.hpp" />
     <ClInclude Include="scheduler_operation.hpp" />
@@ -91,6 +92,7 @@
     <ClInclude Include="select_interrupter.hpp" />
     <ClInclude Include="service_registry.hpp" />
     <ClInclude Include="thread_context.hpp" />
+    <ClInclude Include="thread_guard.hpp" />
     <ClInclude Include="thread_info_base.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -102,7 +104,11 @@
     <ClCompile Include="select_interrupter.cc" />
     <ClCompile Include="service_registry.cc" />
   </ItemGroup>
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <LibraryDependencies>pthread</LibraryDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

@@ -32,8 +32,7 @@ class scheduler_operation
     }
   }
 
-  void destroy(void* owner, const std::error_code& ec,
-               std::size_t bytes_transferred)
+  void destroy()
   {
     if (func_) {
       func_(0, this, std::error_code(), 0);

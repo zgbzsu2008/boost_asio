@@ -67,7 +67,8 @@ class execution_context_service_base : public execution_context::service
   execution_context_service_base(execution_context& e)
       : execution_context::service(e)
   {}
-  static const std::string key() { return typeid(Type).name(); }
+
+  static std::string key() { return typeid(Type).name(); }
 };
 
 }  // namespace detail

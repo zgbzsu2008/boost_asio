@@ -17,6 +17,14 @@ class op_queue : public std::queue<T*, std::list<T*>>
 
   void push(op_queue& q) { this->c.splice(this->c.end(), q.c); }
 
+  template <typename U>
+  void push(op_queue<U>& q)
+  {
+    while (auto v = q.front()) {
+      this->push(static_cast<T*>(v));
+    }
+  }
+
   T* front()
   {
     return this->empty() ? std::queue<T*, std::list<T*>>::front() : 0;
@@ -25,14 +33,6 @@ class op_queue : public std::queue<T*, std::list<T*>>
   T* back()
   {
     return this->empty() ? std::queue<T*, std::list<T*>>::back() : 0;
-  }
-
-  void print()
-  {
-    for (auto it : this->c) {
-      std::cout << it << "  ";
-    }
-    std::cout << std::endl;
   }
 };
 

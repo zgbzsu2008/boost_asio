@@ -14,7 +14,7 @@ io_context::impl_type& io_context::add_impl(io_context::impl_type* impl)
   return *ptr.release();
 }
 
-io_context::io_context() : impl_(add_impl(new impl_type(*this, 1))) {}
+io_context::io_context() : impl_(add_impl(new impl_type(*this, 2))) {}
 
 io_context::io_context(int concurrency_hint)
     : impl_(add_impl(new impl_type(*this, concurrency_hint)))

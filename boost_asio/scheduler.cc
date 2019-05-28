@@ -2,6 +2,7 @@
 #include "epoll_reactor.hpp"
 #include "scheduler_thread_info.hpp"
 
+#include <iostream>
 #include <limits>
 
 namespace boost {
@@ -49,6 +50,41 @@ struct scheduler::work_cleanup
   thread_info *this_thread_;
 };
 
+scheduler::scheduler(execution_context &ctx, int concurrency_hint)
+    : execution_context_service_base(ctx),
+      one_thread_(concurrency_hint == 1),
+      concurrency_hint_(concurrency_hint)
+{
+  ++outstanding_work_;
+}
+
+scheduler::~scheduler() {}
+
+void scheduler::shutdown()
+{
+  std::unique_lock<std::mutex> lock(mutex_);
+  shutdown_ = true;
+  lock.unlock();
+
+  while (operation *o = op_queue_.front()) {
+    op_queue_.pop();
+    if (o != &task_operation_) {
+      o->destroy();
+    }
+  }
+  task_ = 0;
+}
+
+void scheduler::init_task()
+{
+  std::unique_lock<std::mutex> lock(mutex_);
+  if (!shutdown_ && !task_) {
+    task_ = &use_service<epoll_reactor>(this->context());
+    op_queue_.push(&task_operation_);
+    wake_one_thread_and_unlock(lock);
+  }
+}
+
 std::size_t scheduler::run(std::error_code &ec)
 {
   ec = std::error_code();
@@ -78,11 +114,11 @@ std::size_t scheduler::do_run_one(std::unique_lock<std::mutex> &lock,
   while (!stopped_) {
     if (!op_queue_.empty()) {
       std::cout << "scheduler::do_run_one(): working... pid= "
-                << std::this_thread::get_id() << '\n';
+                << std::this_thread::get_id() << std::endl;
       operation *o = op_queue_.front();
       op_queue_.pop();
       bool more_handlers = (!op_queue_.empty());
-      if (o == &task_operation_) {  // task op
+      if (o == &task_operation_) {
         task_interrupted_ = more_handlers;
         if (more_handlers && !one_thread_) {
           wakeup_event_.unlock_and_signal_one(lock);
@@ -108,7 +144,7 @@ std::size_t scheduler::do_run_one(std::unique_lock<std::mutex> &lock,
       }
     } else {
       std::cout << "scheduler::do_run_one(): waiting... pid= "
-                << std::this_thread::get_id() << '\n';
+                << std::this_thread::get_id() << std::endl;
       wakeup_event_.clear(lock);
       wakeup_event_.wait(lock);
     }
@@ -127,6 +163,87 @@ bool scheduler::stopped() const
 {
   std::unique_lock<std::mutex> lock(mutex_);
   return stopped_;
+}
+
+void scheduler::restart() {}
+
+void scheduler::compensating_work_started()
+{
+  thread_info_base *this_thread = thread_call_stack::contains(this);
+  ++(static_cast<thread_info *>(this_thread)->private_outstanding_work);
+}
+
+void scheduler::do_dispatch(operation *op)
+{
+  work_started();
+  std::unique_lock<std::mutex> lock(mutex_);
+  op_queue_.push(op);
+  wake_one_thread_and_unlock(lock);
+}
+
+void scheduler::post_immediate_completion(operation *op, bool is_continuation)
+{
+  if (one_thread_ || is_continuation) {
+    if (thread_info_base *this_thread = thread_call_stack::contains(this)) {
+      ++(static_cast<thread_info *>(this_thread)->private_outstanding_work);
+      (static_cast<thread_info *>(this_thread))->private_op_queue.push(op);
+      return;
+    }
+  }
+
+  work_started();
+  std::unique_lock<std::mutex> lock(mutex_);
+  op_queue_.push(op);
+  wake_one_thread_and_unlock(lock);
+}
+
+void scheduler::post_deferred_completion(operation *op)
+{
+  if (one_thread_) {
+    if (thread_info_base *this_thread = thread_call_stack::contains(this)) {
+      // ++(static_cast<thread_info*>(this_thread)->private_outstanding_work);
+      (static_cast<thread_info *>(this_thread))->private_op_queue.push(op);
+      return;
+    }
+  }
+
+  // work_started();
+  std::unique_lock<std::mutex> lock(mutex_);
+  op_queue_.push(op);
+  wake_one_thread_and_unlock(lock);
+}
+
+void scheduler::post_deferred_completions(op_queue<operation> &ops)
+{
+  if (one_thread_) {
+    if (thread_info_base *this_thread = thread_call_stack::contains(this)) {
+      ops.push(static_cast<thread_info *>(this_thread)->private_op_queue);
+      return;
+    }
+  }
+
+  std::unique_lock<std::mutex> lock(mutex_);
+  op_queue_.push(ops);
+  wake_one_thread_and_unlock(lock);
+}
+
+void scheduler::abandon_operations(op_queue<operation> &ops)
+{
+  op_queue<operation> ops2;
+  ops2.push(ops);
+}
+
+void scheduler::stop_all_threads(std::unique_lock<std::mutex> &lock) {}
+
+void scheduler::wake_one_thread_and_unlock(std::unique_lock<std::mutex> &lock)
+{
+  if (!wakeup_event_.maybe_unlock_and_signal_one(lock)){
+    if (&task_interrupted_ && task_) {
+      task_interrupted_ = true;
+      task_->interrupt();
+    }
+    lock.unlock();
+  }
 }
 
 }  // namespace detail

@@ -13,8 +13,9 @@ namespace asio {
 namespace detail {
 
 template <typename Handler = std::function<void>,
-          typename Alloc = recycling_allocator<void>>
-class executor_op : public scheduler_operation
+          typename Alloc = recycling_allocator<void>,
+          typename Operation = scheduler_operation>
+class executor_op : public Operation
 {
  public:
   struct ptr
