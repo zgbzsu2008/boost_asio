@@ -16,8 +16,7 @@ class thread_guard : private noncopyable
   thread_guard(const std::function<void()>& func, int num_threads)
   {
     for (int i = 0; i < num_threads; ++i) {
-      std::thread t = std::thread(func);
-      threads_.push_back(std::move(t));
+      threads_.push_back(std::thread(func));
     }
   }
 

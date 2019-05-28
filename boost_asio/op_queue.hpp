@@ -1,10 +1,10 @@
 #ifndef BOOST_ASIO_DETAIL_OP_QUEUE_HPP
 #define BOOST_ASIO_DETAIL_OP_QUEUE_HPP
 
+#include <algorithm>
 #include <iostream>
 #include <list>
 #include <queue>
-
 namespace boost {
 namespace asio {
 namespace detail {
@@ -21,7 +21,7 @@ class op_queue : public std::queue<T*, std::list<T*>>
   void push(op_queue<U>& q)
   {
     while (auto v = q.front()) {
-      this->push(static_cast<T*>(v));
+      this->push(v);
     }
   }
 
@@ -33,6 +33,11 @@ class op_queue : public std::queue<T*, std::list<T*>>
   T* back()
   {
     return this->empty() ? std::queue<T*, std::list<T*>>::back() : 0;
+  }
+
+  bool is_enqueued(T* v)
+  {
+    return std::find(this->c.begin(), this->c.end(), v) != this->c.end();
   }
 };
 

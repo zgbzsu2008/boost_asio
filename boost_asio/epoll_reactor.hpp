@@ -35,7 +35,6 @@ class epoll_reactor : public execution_context_service_base<epoll_reactor>
     epoll_reactor* reactor_;
     int descriptor_;
     uint32_t registered_events_;
-    bool is_enqueued;
     op_queue<reactor_op> op_queue_[max_ops];
     bool try_speculative_[max_ops];
     bool shutdown_;
@@ -49,6 +48,8 @@ class epoll_reactor : public execution_context_service_base<epoll_reactor>
                             const std::error_code& ec,
                             std::size_t bytes_transferred);
   };
+  using pre_descriptor_data = descriptor_state*;
+  using socket_type = int;
 
   epoll_reactor(execution_context& ctx);
   ~epoll_reactor();
@@ -60,6 +61,27 @@ class epoll_reactor : public execution_context_service_base<epoll_reactor>
   void interrupt();
   void post_immediate_completion(reactor_op* op, bool is_continuation);
 
+  int register_descriptor(socket_type descriptor,
+                          pre_descriptor_data& descriptor_data);
+
+  int register_internal_descriptor(int op_type, socket_type descriptor,
+                                   pre_descriptor_data& descriptor_data,
+                                   reactor_op* op);
+
+  void start_op(int op_type, socket_type descriptor,
+                pre_descriptor_data& descriptor_data, reactor_op* op,
+                bool is_continuation, bool allow_speculative);
+
+  void cancel_ops(socket_type descriptor, pre_descriptor_data& descriptor_data);
+
+  void deregister_descriptor(socket_type descriptor,
+                             pre_descriptor_data& descriptor_data,
+                             bool closing);
+
+  void deregister_internal_descriptor(socket_type descriptor,
+                                      pre_descriptor_data& descriptor_data);
+
+  void cleanup_descriptor_data(pre_descriptor_data& descriptor_data);
  private:
   static int do_epoll_create();
 

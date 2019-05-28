@@ -4,7 +4,6 @@
 #include <atomic>
 #include <mutex>
 
-#include "channel.h"
 #include "event.hpp"
 #include "execution_context.hpp"
 #include "scheduler_operation.hpp"
