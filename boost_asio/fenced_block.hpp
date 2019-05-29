@@ -4,32 +4,19 @@
 #include <atomic>
 #include "noncopyable.hpp"
 
-namespace boost {
-namespace asio {
-namespace detail {
+namespace boost::asio::detail {
 
-class fenced_block : private noncopyable
-{
+class fenced_block : private noncopyable {
  public:
-  enum half_t
-  {
-    half
-  };
-  enum full_t
-  {
-    full
-  };
+  enum half_t { half };
+  enum full_t { full };
 
   explicit fenced_block(half_t) {}
-  explicit fenced_block(full_t)
-  {
+  explicit fenced_block(full_t) {
     std::atomic_thread_fence(std::memory_order_acquire);
   }
 
   ~fenced_block() { std::atomic_thread_fence(std::memory_order_release); }
 };
-
-}  // namespace detail
-}  // namespace asio
-}  // namespace boost
+}  // namespace boost::asio::detail
 #endif

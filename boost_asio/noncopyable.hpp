@@ -1,10 +1,7 @@
 #ifndef BOOST_ASIO_DETAIL_NONCOPYABLE_HPP
 #define BOOST_ASIO_DETAIL_NONCOPYABLE_HPP
 
-namespace boost {
-namespace asio {
-namespace detail {
-
+namespace boost::asio::detail {
 class noncopyable {
  protected:
   noncopyable() = default;
@@ -14,8 +11,5 @@ class noncopyable {
   noncopyable(const noncopyable&) = delete;
   const noncopyable& operator=(const noncopyable&) = delete;
 };
-
-}  // namespace detail
-}  // namespace asio
-}  // namespace boost
+}  // namespace boost::asio::detail
 #endif

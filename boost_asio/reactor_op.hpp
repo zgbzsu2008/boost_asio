@@ -3,19 +3,11 @@
 
 #include "scheduler_operation.hpp"
 
-namespace boost {
-namespace asio {
-namespace detail {
+namespace boost::asio::detail {
 
-class reactor_op : public scheduler_operation
-{
+class reactor_op : public scheduler_operation {
  public:
-  enum status
-  {
-    not_done,
-    done,
-    done_and_exhausted
-  };
+  enum status { not_done, done, done_and_exhausted };
 
   using perform_func_type = std::function<status(reactor_op*)>;
 
@@ -28,14 +20,11 @@ class reactor_op : public scheduler_operation
       : scheduler_operation(func),
         bytes_transferred_(0),
         perform_func_(perfom_func)
-        
+
   {}
 
  private:
   perform_func_type perform_func_;
 };
-
-}  // namespace detail
-}  // namespace asio
-}  // namespace boost
+}  // namespace boost::asio::detail
 #endif

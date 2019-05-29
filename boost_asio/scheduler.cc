@@ -1,18 +1,16 @@
 #include "scheduler.hpp"
-#include "epoll_reactor.hpp"
-#include "scheduler_thread_info.hpp"
 
 #include <iostream>
 #include <limits>
 
-namespace boost {
-namespace asio {
-namespace detail {
+#include "epoll_reactor.hpp"
+#include "scheduler_thread_info.hpp"
+#include "service_registry_helpers.hpp"
 
-struct scheduler::task_cleanup
-{
-  ~task_cleanup()
-  {
+namespace boost::asio::detail {
+
+struct scheduler::task_cleanup {
+  ~task_cleanup() {
     if (this_thread_->private_outstanding_work > 0) {
       scheduler_->outstanding_work_ += this_thread_->private_outstanding_work;
     }
@@ -29,10 +27,8 @@ struct scheduler::task_cleanup
   thread_info *this_thread_;
 };
 
-struct scheduler::work_cleanup
-{
-  ~work_cleanup()
-  {
+struct scheduler::work_cleanup {
+  ~work_cleanup() {
     if (this_thread_->private_outstanding_work > 0) {
       scheduler_->outstanding_work_ += this_thread_->private_outstanding_work;
     }
@@ -53,15 +49,13 @@ struct scheduler::work_cleanup
 scheduler::scheduler(execution_context &ctx, int concurrency_hint)
     : execution_context_service_base(ctx),
       one_thread_(concurrency_hint == 1),
-      concurrency_hint_(concurrency_hint)
-{
+      concurrency_hint_(concurrency_hint) {
   ++outstanding_work_;
 }
 
 scheduler::~scheduler() {}
 
-void scheduler::shutdown()
-{
+void scheduler::shutdown() {
   std::unique_lock<std::mutex> lock(mutex_);
   shutdown_ = true;
   lock.unlock();
@@ -75,8 +69,7 @@ void scheduler::shutdown()
   task_ = 0;
 }
 
-void scheduler::init_task()
-{
+void scheduler::init_task() {
   std::unique_lock<std::mutex> lock(mutex_);
   if (!shutdown_ && !task_) {
     task_ = &use_service<epoll_reactor>(this->context());
@@ -85,8 +78,7 @@ void scheduler::init_task()
   }
 }
 
-std::size_t scheduler::run(std::error_code &ec)
-{
+std::size_t scheduler::run(std::error_code &ec) {
   ec = std::error_code();
   if (outstanding_work_ == 0) {
     stop();
@@ -109,8 +101,7 @@ std::size_t scheduler::run(std::error_code &ec)
 
 std::size_t scheduler::do_run_one(std::unique_lock<std::mutex> &lock,
                                   thread_info &this_thread,
-                                  const std::error_code &ec)
-{
+                                  const std::error_code &ec) {
   while (!stopped_) {
     if (!op_queue_.empty()) {
       std::cout << "scheduler::do_run_one(): working... pid= "
@@ -149,40 +140,37 @@ std::size_t scheduler::do_run_one(std::unique_lock<std::mutex> &lock,
       wakeup_event_.wait(lock);
     }
   }
-
   return 0;
 }
 
-void scheduler::stop()
-{
+void scheduler::stop() {
   std::unique_lock<std::mutex> lock(mutex_);
   this->stop_all_threads(lock);
 }
 
-bool scheduler::stopped() const
-{
+bool scheduler::stopped() const {
   std::unique_lock<std::mutex> lock(mutex_);
   return stopped_;
 }
 
-void scheduler::restart() {}
+void scheduler::restart() {
+  std::unique_lock<std::mutex> lock(mutex_);
+  stopped_ = false;
+}
 
-void scheduler::compensating_work_started()
-{
+void scheduler::compensating_work_started() {
   thread_info_base *this_thread = thread_call_stack::contains(this);
   ++(static_cast<thread_info *>(this_thread)->private_outstanding_work);
 }
 
-void scheduler::do_dispatch(operation *op)
-{
+void scheduler::do_dispatch(operation *op) {
   work_started();
   std::unique_lock<std::mutex> lock(mutex_);
   op_queue_.push(op);
   wake_one_thread_and_unlock(lock);
 }
 
-void scheduler::post_immediate_completion(operation *op, bool is_continuation)
-{
+void scheduler::post_immediate_completion(operation *op, bool is_continuation) {
   if (one_thread_ || is_continuation) {
     if (thread_info_base *this_thread = thread_call_stack::contains(this)) {
       ++(static_cast<thread_info *>(this_thread)->private_outstanding_work);
@@ -197,8 +185,7 @@ void scheduler::post_immediate_completion(operation *op, bool is_continuation)
   wake_one_thread_and_unlock(lock);
 }
 
-void scheduler::post_deferred_completion(operation *op)
-{
+void scheduler::post_deferred_completion(operation *op) {
   if (one_thread_) {
     if (thread_info_base *this_thread = thread_call_stack::contains(this)) {
       // ++(static_cast<thread_info*>(this_thread)->private_outstanding_work);
@@ -213,8 +200,7 @@ void scheduler::post_deferred_completion(operation *op)
   wake_one_thread_and_unlock(lock);
 }
 
-void scheduler::post_deferred_completions(op_queue<operation> &ops)
-{
+void scheduler::post_deferred_completions(op_queue<operation> &ops) {
   if (one_thread_) {
     if (thread_info_base *this_thread = thread_call_stack::contains(this)) {
       ops.push(static_cast<thread_info *>(this_thread)->private_op_queue);
@@ -227,17 +213,22 @@ void scheduler::post_deferred_completions(op_queue<operation> &ops)
   wake_one_thread_and_unlock(lock);
 }
 
-void scheduler::abandon_operations(op_queue<operation> &ops)
-{
+void scheduler::abandon_operations(op_queue<operation> &ops) {
   op_queue<operation> ops2;
   ops2.push(ops);
 }
 
-void scheduler::stop_all_threads(std::unique_lock<std::mutex> &lock) {}
+void scheduler::stop_all_threads(std::unique_lock<std::mutex> &lock) {
+  stopped_ = true;
+  wakeup_event_.signal_all(lock);
+  if (!task_interrupted_ && task_) {
+    task_interrupted_ = true;
+    task_->interrupt();
+  }
+}
 
-void scheduler::wake_one_thread_and_unlock(std::unique_lock<std::mutex> &lock)
-{
-  if (!wakeup_event_.maybe_unlock_and_signal_one(lock)){
+void scheduler::wake_one_thread_and_unlock(std::unique_lock<std::mutex> &lock) {
+  if (!wakeup_event_.maybe_unlock_and_signal_one(lock)) {
     if (&task_interrupted_ && task_) {
       task_interrupted_ = true;
       task_->interrupt();
@@ -245,7 +236,4 @@ void scheduler::wake_one_thread_and_unlock(std::unique_lock<std::mutex> &lock)
     lock.unlock();
   }
 }
-
-}  // namespace detail
-}  // namespace asio
-}  // namespace boost
+}  // namespace boost::asio::detail

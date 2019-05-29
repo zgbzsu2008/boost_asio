@@ -1,15 +1,13 @@
 #ifndef BOOST_ASIO_DETAIL_CALL_STACK_HPP
 #define BOOST_ASIO_DETAIL_CALL_STACK_HPP
 
+#include <forward_list>
 #include <memory>
 #include <thread>
-#include <forward_list>
 
 #include "noncopyable.hpp"
 
-namespace boost {
-namespace asio {
-namespace detail {
+namespace boost::asio::detail {
 
 template <typename Key, typename Value = unsigned char>
 class call_stack {
@@ -64,8 +62,5 @@ template <typename Key, typename Value>
 thread_local
     typename call_stack<Key, Value>::context* call_stack<Key, Value>::top_ = 0;
 
-}  // namespace detail
-}  // namespace asio
-}  // namespace boost
-
+}  // namespace boost::asio::detail
 #endif

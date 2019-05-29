@@ -7,19 +7,15 @@
 #include "event.hpp"
 #include "execution_context.hpp"
 #include "scheduler_operation.hpp"
-#include "scheduler_thread_info.hpp"
 #include "thread_context.hpp"
 
-namespace boost {
-namespace asio {
-namespace detail {
+namespace boost::asio::detail {
 
 struct scheduler_thread_info;
 class epoll_reactor;
 
 class scheduler : public execution_context_service_base<scheduler>,
-                  public thread_context
-{
+                  public thread_context {
  public:
   using thread_info = scheduler_thread_info;
 
@@ -38,8 +34,7 @@ class scheduler : public execution_context_service_base<scheduler>,
 
   void work_started() { ++outstanding_work_; }
   void compensating_work_started();
-  void work_finished()
-  {
+  void work_finished() {
     if (--outstanding_work_ == 0) {
       stop();
     }
@@ -52,6 +47,8 @@ class scheduler : public execution_context_service_base<scheduler>,
   void post_deferred_completion(operation* op);
   void post_deferred_completions(op_queue<operation>& ops);
   void abandon_operations(op_queue<operation>& ops);
+
+  int concurrency_hint() const { return concurrency_hint_; }
 
  private:
   void stop_all_threads(std::unique_lock<std::mutex>& lock);
@@ -69,8 +66,7 @@ class scheduler : public execution_context_service_base<scheduler>,
 
   epoll_reactor* task_;
 
-  struct task_operation : operation
-  {
+  struct task_operation : operation {
     task_operation() : operation(0) {}
   } task_operation_;
 
@@ -83,7 +79,5 @@ class scheduler : public execution_context_service_base<scheduler>,
 
   const int concurrency_hint_;
 };
-}  // namespace detail
-}  // namespace asio
-}  // namespace boost
+}  // namespace boost::asio::detail
 #endif

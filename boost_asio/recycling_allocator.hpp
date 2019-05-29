@@ -5,36 +5,28 @@
 #include "thread_context.hpp"
 #include "thread_info_base.hpp"
 
-namespace boost {
-namespace asio {
-namespace detail {
-
+namespace boost::asio::detail {
 template <typename T>
-class recycling_allocator
-{
+class recycling_allocator {
  public:
   using value_type = T;
 
   template <typename U>
-  struct rebind
-  {
+  struct rebind {
     using other = recycling_allocator<U>;
   };
 
   recycling_allocator(){};
   template <typename U>
-  recycling_allocator(const recycling_allocator<U>&)
-  {}
+  recycling_allocator(const recycling_allocator<U>&) {}
 
-  T* allocate(std::size_t n)
-  {
+  T* allocate(std::size_t n) {
     void* p = thread_info_base::allocate(
         thread_context::thread_call_stack::top(), sizeof(T) * n);
     return static_cast<T*>(p);
   }
 
-  void deallocate(T* p, std::size_t n)
-  {
+  void deallocate(T* p, std::size_t n) {
     thread_info_base::deallocate(thread_context::thread_call_stack::top(), p,
                                  sizeof(T) * n);
   }
@@ -42,45 +34,36 @@ class recycling_allocator
 
 // 特化void
 template <>
-class recycling_allocator<void>
-{
+class recycling_allocator<void> {
  public:
   using value_type = void;
 
   template <typename U>
-  struct rebind
-  {
+  struct rebind {
     using other = recycling_allocator<U>;
   };
 
   recycling_allocator(){};
   template <typename U>
-  recycling_allocator(const recycling_allocator<U>&)
-  {}
+  recycling_allocator(const recycling_allocator<U>&) {}
 };
 
 template <typename Alloc>
-struct get_recycling_allocator
-{
+struct get_recycling_allocator {
   using type = Alloc;
   static type get(const Alloc& a) { return a; };
 };
 
 // 特化std::allocator<T>
 template <typename T>
-struct get_recycling_allocator<std::allocator<T>>
-{
+struct get_recycling_allocator<std::allocator<T>> {
   using type = std::allocator<T>;
   static type get(const std::allocator<T>&) { return type(); }
 };
 
 template <typename Alloc, typename T>
-struct rebind_alloc
-{
+struct rebind_alloc {
   using type = typename std::allocator_traits<Alloc>::template rebind_alloc<T>;
 };
-
-}  // namespace detail
-}  // namespace asio
-}  // namespace boost
+}  // namespace boost::asio::detail
 #endif

@@ -6,17 +6,12 @@
 
 #include "noncopyable.hpp"
 
-namespace boost {
-namespace asio {
-namespace detail {
-
-class thread_info_base : private noncopyable
-{
+namespace boost::asio::detail {
+class thread_info_base : private noncopyable {
  public:
   thread_info_base() : in_use_(false) {}
 
-  static void* allocate(thread_info_base* this_thread, std::size_t size)
-  {
+  static void* allocate(thread_info_base* this_thread, std::size_t size) {
     if (this_thread && !this_thread->in_use_ && (size < sizeof(storage_))) {
       this_thread->in_use_ = true;
       return &this_thread->storage_;
@@ -26,8 +21,7 @@ class thread_info_base : private noncopyable
   }
 
   static void deallocate(thread_info_base* this_thread, void* pointer,
-                         std::size_t size)
-  {
+                         std::size_t size) {
     if (this_thread && pointer == &this_thread->storage_ &&
         (size < sizeof(storage_))) {
       this_thread->in_use_ = false;
@@ -40,8 +34,5 @@ class thread_info_base : private noncopyable
   std::aligned_storage<1024>::type storage_;
   bool in_use_;
 };
-
-}  // namespace detail
-}  // namespace asio
-}  // namespace boost
+}  // namespace boost::asio::detail
 #endif

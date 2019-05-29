@@ -1,8 +1,8 @@
 #ifndef BOOST_ASIO_DETAIL_EPOLL_REACTOR_HPP
 #define BOOST_ASIO_DETAIL_EPOLL_REACTOR_HPP
 
-#include <mutex>
 #include <map>
+#include <mutex>
 
 #include "execution_context.hpp"
 #include "io_context.hpp"
@@ -11,15 +11,11 @@
 
 struct epoll_event;
 
-namespace boost {
-namespace asio {
-namespace detail {
+namespace boost::asio::detail {
 
-class epoll_reactor : public execution_context_service_base<epoll_reactor>
-{
+class epoll_reactor : public execution_context_service_base<epoll_reactor> {
  public:
-  enum op_types
-  {
+  enum op_types {
     read_op = 0,
     write_op = 1,
     connect_op = 1,
@@ -27,8 +23,7 @@ class epoll_reactor : public execution_context_service_base<epoll_reactor>
     max_ops = 3
   };
 
-  class descriptor_state : operation
-  {
+  class descriptor_state : operation {
     friend class epoll_reactor;
 
     mutable std::mutex mutex_;
@@ -82,6 +77,7 @@ class epoll_reactor : public execution_context_service_base<epoll_reactor>
                                       pre_descriptor_data& descriptor_data);
 
   void cleanup_descriptor_data(pre_descriptor_data& descriptor_data);
+
  private:
   static int do_epoll_create();
 
@@ -94,8 +90,5 @@ class epoll_reactor : public execution_context_service_base<epoll_reactor>
   struct perform_io_cleanup_on_block_exit;
   friend struct perform_io_cleanup_on_block_exit;
 };
-
-}  // namespace detail
-}  // namespace asio
-}  // namespace boost
+}  // namespace boost::asio::detail
 #endif

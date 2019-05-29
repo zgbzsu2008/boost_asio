@@ -5,21 +5,26 @@
 #include <system_error>
 
 #include "execution_context.hpp"
+#include "executor_op.hpp"
+#include "fenced_block.hpp"
 #include "scheduler.hpp"
-#include "service_registry.hpp"
+#include "scheduler_operation.hpp"
 
-namespace boost {
-namespace asio {
+namespace boost::asio {
 
-class io_context : public execution_context
-{
+class io_context : public execution_context {
  public:
-  class service;
   using impl_type = detail::scheduler;
+  class service;
+
+  class executor_type;
+  friend class executor_type;
 
   io_context();
   explicit io_context(int concurrency_hint);
   ~io_context();
+
+  executor_type get_executor();
 
   std::size_t run();
 
@@ -30,8 +35,32 @@ class io_context : public execution_context
   impl_type& impl_;
 };
 
-class io_context::service : public execution_context::service
-{
+class io_context::executor_type {
+ public:
+  io_context& context() const { return io_context_; }
+  void on_work_started() const { io_context_.impl_.work_started(); }
+  void on_work_finished() const { io_context_.impl_.work_finished(); };
+
+  template <typename Function, typename Alloc>
+  void dispatch(Function&& func, const Alloc& a) const;
+
+  template <typename Function, typename Alloc>
+  void post(Function&& func, const Alloc& a) const;
+
+  template <typename Function, typename Alloc>
+  void defer(Function&& func, const Alloc& a) const;
+
+  bool running_in_this_thread() const {
+    return io_context_.impl_.can_dispatch();
+  }
+
+ private:
+  friend class io_context;
+  explicit executor_type(io_context& ioc) : io_context_(ioc) {}
+  io_context& io_context_;
+};
+
+class io_context::service : public execution_context::service {
  public:
   service(io_context& owner) : execution_context::service(owner) {}
   virtual ~service() {}
@@ -45,58 +74,50 @@ class io_context::service : public execution_context::service
 };
 
 namespace detail {
-
 template <typename Type>
-class io_context_service_base : public io_context::service
-{
+class io_context_service_base : public io_context::service {
  public:
   io_context_service_base(io_context& io) : io_context::service(io) {}
 
   static std::string key() { return typeid(Type).name(); }
 };
-
 }  // namespace detail
 
-template <typename Service>
-Service& use_service(execution_context& e)
-{
-  return e.service_registry_->template use_service<Service>();
+template <typename Function, typename Alloc>
+inline void io_context::executor_type::dispatch(Function&& func,
+                                                const Alloc& a) const {
+  if (running_in_this_thread()) {
+    detail::fenced_block b(detail::fenced_block::full);
+    func();
+    return;
+  }
+
+  using op = detail::executor_op<Function, Alloc, detail::operation>;
+  typename op::ptr p = {std::addressof(a), op::ptr::allocate(a), 0};
+  p.p = new (p.v) op(std::move(func), a);
+  io_context_.impl_.post_immediate_completion(p.p, false);
+  p.v = p.p = 0;
 }
 
-template <typename Service, typename... Args>
-Service& make_service(execution_context& e, Args&&... args)
-{
-  std::unique_ptr<Service> service(new Service(e, std::forward<Args>(args)...));
-  e.service_registry_->template add_service<Service>(service.get());
-  Service& result = *service.release();
-  return result;
+template <typename Function, typename Alloc>
+inline void io_context::executor_type::post(Function&& func,
+                                            const Alloc& a) const {
+  using op = detail::executor_op<Function, Alloc, detail::operation>;
+  typename op::ptr p = {std::addressof(a), op::ptr::allocate(a), 0};
+  p.p = new (p.v) op(std::move(func), a);
+  io_context_.impl_.post_immediate_completion(p.p, false);
+  p.v = p.p = 0;
 }
 
-template <typename Service>
-void add_service(execution_context& e, Service* new_service)
-{
-  e.service_registry_->template add_service<Service>(new_service);
+template <typename Function, typename Alloc>
+inline void io_context::executor_type::defer(Function&& func,
+                                             const Alloc& a) const {
+  using op = detail::executor_op<Function, Alloc, detail::operation>;
+  typename op::ptr p = {std::addressof(a), op::ptr::allocate(a), 0};
+  p.p = new (p.v) op(std::move(func), a);
+  io_context_.impl_.post_immediate_completion(p.p, true);
+  p.v = p.p = 0;
 }
 
-template <typename Service>
-bool has_service(execution_context& e)
-{
-  return e.service_registry_->template has_service<Service>();
-}
-
-template <typename Service>
-Service& use_service(io_context& ioc)
-{
-  return ioc.service_registry_->template use_service<Service>(ioc);
-}
-
-template <>
-inline detail::scheduler& use_service<detail::scheduler>(io_context& ioc)
-{
-  return ioc.impl_;
-}
-
-}  // namespace asio
-}  // namespace boost
-
+}  // namespace boost::asio
 #endif
