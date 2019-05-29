@@ -25,18 +25,25 @@ class async_completion {
   using type =
       typename async_result<typename std::decay<T>::type, S>::handler_type;
 
-  using handler_type = typename std::conditional<std::is_same<T, type>::value,
-                                                 type&, type>::type;
-
  public:
+#if defined(BOOST_ASIO_HAS_MOVE)
+  using handler_type =
+      typename std::conditional_t<std::is_same_v<T, type>, type&, type>;
   explicit async_completion(T& token)
       : handler_(
-            static_cast<typename std::conditional<std::is_same<T, type>::value,
-                                                  type&, T&&>::type>(token)),
+            static_cast<typename std::conditional_t<std::is_same_v<T, type>,
+                                                    type&, T&&>>(token)),
         result_(handler_) {}
+#else
+  using handler_type = type;
+  explicit async_completion(typename std::decay_t<T>& token)
+      : handler_(token), result_(handler_) {}
+  explicit async_completion(const typename std::decay_t<T>& token)
+      : handler_(token), result_(handler_) {}
+#endif
 
   handler_type handler_;
-  async_result<typename std::decay<T>::type, S> result_;
+  async_result<typename std::decay_t<T>, S> result_;
 };
 
 namespace detail {
