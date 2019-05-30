@@ -6,45 +6,61 @@
 #include <unistd.h>
 #include <system_error>
 
-namespace boost::asio::detail {
+namespace boost::asio::detail
+{
 
-select_interrupter::select_interrupter() { open_descriptors(); }
-select_interrupter::~select_interrupter() { close_descriptors(); }
-
-void select_interrupter::recreate() {
-  close_descriptors();
-  fd_ = -1;
-  open_descriptors();
+select_interrupter::select_interrupter()
+{
+    open_descriptors();
+}
+select_interrupter::~select_interrupter()
+{
+    close_descriptors();
 }
 
-void select_interrupter::interrupt() {
-  uint64_t n = 1;
-  ssize_t result = ::write(fd_, &n, sizeof(uint64_t));
-  (void)result;
+void select_interrupter::recreate()
+{
+    close_descriptors();
+    fd_ = -1;
+    open_descriptors();
 }
 
-bool select_interrupter::reset() {
-  for (;;) {
-    uint64_t n(0);
-    errno = 0;
-    ssize_t result = ::read(fd_, &n, sizeof(uint64_t));
-    if (result < 0 && errno == EINTR) {
-      continue;
+void select_interrupter::interrupt()
+{
+    uint64_t n = 1;
+    ssize_t result = ::write(fd_, &n, sizeof(uint64_t));
+    (void)result;
+}
+
+bool select_interrupter::reset()
+{
+    for(;;)
+    {
+        uint64_t n(0);
+        errno = 0;
+        ssize_t result = ::read(fd_, &n, sizeof(uint64_t));
+        if(result < 0 && errno == EINTR)
+        {
+            continue;
+        }
+        return result > 0;
     }
-    return result > 0;
-  }
 }
 
-void select_interrupter::open_descriptors() {
-  fd_ = ::eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
-  if (fd_ < 0) {
-    throw std::error_code{errno, std::generic_category()};
-  }
+void select_interrupter::open_descriptors()
+{
+    fd_ = ::eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
+    if(fd_ < 0)
+    {
+        throw std::error_code{errno, std::generic_category()};
+    }
 }
 
-void select_interrupter::close_descriptors() {
-  if (fd_ != -1) {
-    ::close(fd_);
-  }
+void select_interrupter::close_descriptors()
+{
+    if(fd_ != -1)
+    {
+        ::close(fd_);
+    }
 }
 }  // namespace boost::asio::detail

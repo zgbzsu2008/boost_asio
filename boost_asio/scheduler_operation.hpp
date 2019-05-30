@@ -11,33 +11,39 @@ using std::placeholders::_2;
 using std::placeholders::_3;
 using std::placeholders::_4;
 
-namespace boost::asio::detail {
+namespace boost::asio::detail
+{
 class scheduler;
-class scheduler_operation {
- public:
-  using func_type = std::function<void(void*, scheduler_operation*,
-                                       const std::error_code&, std::size_t)>;
+class scheduler_operation
+{
+public:
+    using func_type = std::function<void(void*, scheduler_operation*,
+                                         const std::error_code&, std::size_t)>;
 
-  scheduler_operation(const func_type& func) : task_result_(0), func_(func) {}
+    scheduler_operation(const func_type& func) : task_result_(0), func_(func) {}
 
-  void complete(void* owner, const std::error_code& ec,
-                std::size_t bytes_transferred) {
-    if (func_) {
-      func_(owner, this, ec, bytes_transferred);
+    void complete(void* owner, const std::error_code& ec,
+                  std::size_t bytes_transferred)
+    {
+        if(func_)
+        {
+            func_(owner, this, ec, bytes_transferred);
+        }
     }
-  }
 
-  void destroy() {
-    if (func_) {
-      func_(0, this, std::error_code(), 0);
+    void destroy()
+    {
+        if(func_)
+        {
+            func_(0, this, std::error_code(), 0);
+        }
     }
-  }
 
-  friend class scheduler;
-  unsigned int task_result_;
+    friend class scheduler;
+    unsigned int task_result_;
 
- private:
-  func_type func_;
+private:
+    func_type func_;
 };
 using operation = scheduler_operation;
 }  // namespace boost::asio::detail

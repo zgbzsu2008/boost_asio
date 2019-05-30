@@ -8,62 +8,73 @@
 #include "scheduler_operation.hpp"
 #include "thread_context.hpp"
 
-namespace boost::asio::detail {
+namespace boost::asio::detail
+{
 
 template <typename Handler, typename Alloc,
           typename Operation = scheduler_operation>
-class executor_op : public Operation {
- public:
-  struct ptr {
-    using op = executor_op;
-    const Alloc* a;
-    void* v;
-    op* p;
-    ~ptr() { reset(); }
+class executor_op : public Operation
+{
+public:
+    struct ptr
+    {
+        using op = executor_op;
+        const Alloc* a;
+        void* v;
+        op* p;
+        ~ptr() { reset(); }
 
-    static op* allocate(const Alloc& alloc) {
-      using alloc_type = typename get_recycling_allocator<Alloc>::type;
-      using alloc_op = typename rebind_alloc<alloc_type, op>::type;
-      alloc_op a1(get_recycling_allocator<Alloc>::get(alloc));
-      return a1.allocate(1);
+        static op* allocate(const Alloc& alloc)
+        {
+            using alloc_type = typename get_recycling_allocator<Alloc>::type;
+            using alloc_op = typename rebind_alloc<alloc_type, op>::type;
+            alloc_op a1(get_recycling_allocator<Alloc>::get(alloc));
+            return a1.allocate(1);
+        }
+        void reset()
+        {
+            if(p)
+            {
+                p->~op();
+                p = 0;
+            }
+            if(v)
+            {
+                using alloc_type =
+                    typename get_recycling_allocator<Alloc>::type;
+                using alloc_op = typename rebind_alloc<alloc_type, op>::type;
+                alloc_op a1(get_recycling_allocator<Alloc>::get(*a));
+                a1.deallocate(static_cast<op*>(v), 1);
+                v = 0;
+            }
+        }
+    };
+
+    template <typename Function>
+    executor_op(Function&& func, Alloc a)
+      : scheduler_operation(&executor_op::do_complete), handler_(func),
+        alloc_(a)
+    {
     }
-    void reset() {
-      if (p) {
-        p->~op();
-        p = 0;
-      }
-      if (v) {
-        using alloc_type = typename get_recycling_allocator<Alloc>::type;
-        using alloc_op = typename rebind_alloc<alloc_type, op>::type;
-        alloc_op a1(get_recycling_allocator<Alloc>::get(*a));
-        a1.deallocate(static_cast<op*>(v), 1);
-        v = 0;
-      }
+
+private:
+    static void do_complete(void* owner, scheduler_operation* base,
+                            const std::error_code&, std::size_t)
+    {
+        executor_op* e = static_cast<executor_op*>(base);
+        Alloc a(e->alloc_);
+        ptr p = {std::addressof(a), e, e};
+        Handler copy_handler(e->handler_);
+        p.reset();
+        if(owner)
+        {
+            fenced_block b(fenced_block::half);
+            copy_handler();
+        }
     }
-  };
 
-  template <typename Function>
-  executor_op(Function&& func, Alloc a)
-      : scheduler_operation(&executor_op::do_complete),
-        handler_(func),
-        alloc_(a) {}
-
- private:
-  static void do_complete(void* owner, scheduler_operation* base,
-                          const std::error_code&, std::size_t) {
-    executor_op* e = static_cast<executor_op*>(base);
-    Alloc a(e->alloc_);
-    ptr p = {std::addressof(a), e, e};
-    Handler copy_handler(e->handler_);
-    p.reset();
-    if (owner) {
-      fenced_block b(fenced_block::half);
-      copy_handler();
-    }
-  }
-
-  Handler handler_;
-  Alloc alloc_;
+    Handler handler_;
+    Alloc alloc_;
 };
 }  // namespace boost::asio::detail
 #endif
