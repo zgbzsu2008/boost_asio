@@ -75,10 +75,17 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ClInclude Include="address.hpp" />
+    <ClInclude Include="address_v4.hpp" />
     <ClInclude Include="associated_allocator.hpp" />
     <ClInclude Include="associated_executor.hpp" />
     <ClInclude Include="async_result.hpp" />
+    <ClInclude Include="basic_endpoint.hpp" />
+    <ClInclude Include="basic_io_object.hpp" />
+    <ClInclude Include="basic_socket.hpp" />
+    <ClInclude Include="basic_stream_socket.hpp" />
     <ClInclude Include="call_stack.hpp" />
+    <ClInclude Include="endpoint.hpp" />
     <ClInclude Include="epoll_reactor.hpp" />
     <ClInclude Include="event.hpp" />
     <ClInclude Include="execution_context.hpp" />
@@ -101,8 +108,12 @@
     <ClInclude Include="select_interrupter.hpp" />
     <ClInclude Include="service_registry.hpp" />
     <ClInclude Include="service_registry_helpers.hpp" />
+    <ClInclude Include="socket_base.hpp" />
+    <ClInclude Include="socket_ops.hpp" />
+    <ClInclude Include="stream_socket_service.hpp" />
     <ClInclude Include="system_context.hpp" />
     <ClInclude Include="system_executor.hpp" />
+    <ClInclude Include="tcp.hpp" />
     <ClInclude Include="thread_context.hpp" />
     <ClInclude Include="thread_group.hpp" />
     <ClInclude Include="thread_info_base.hpp" />

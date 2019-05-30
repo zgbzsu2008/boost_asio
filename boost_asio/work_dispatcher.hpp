@@ -7,25 +7,17 @@
 
 namespace boost::asio::detail
 {
-template <typename Handler> class work_dispatcher
+template <typename Handler>
+class work_dispatcher
 {
  public:
   using work_type = executor_work_guard<associated_executor_t<Handler>>;
 
-  work_dispatcher(Handler& handler)
-    : work_(get_associated_executor(handler)), handler_(handler)
-  {
-  }
+  work_dispatcher(Handler& handler) : work_(get_associated_executor(handler)), handler_(handler) {}
 
-  work_dispatcher(const work_dispatcher& other)
-    : work_(other.work_), handler_(other.handler_)
-  {
-  }
+  work_dispatcher(const work_dispatcher& other) : work_(other.work_), handler_(other.handler_) {}
 
-  work_dispatcher(work_dispatcher&& other)
-    : work_(other.work_), handler_(other.handler_)
-  {
-  }
+  work_dispatcher(work_dispatcher&& other) : work_(other.work_), handler_(other.handler_) {}
 
   void operator()()
   {

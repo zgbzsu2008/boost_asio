@@ -22,8 +22,7 @@ struct associated_executor : std::false_type
 };
 
 template <typename T, typename Executor>
-struct associated_executor<T, Executor, std::void_t<typename T::executor_type>>
-  : std::true_type
+struct associated_executor<T, Executor, std::void_t<typename T::executor_type>> : std::true_type
 {
   using executor_type = typename T::executor_type;
 };
@@ -34,11 +33,9 @@ auto get_associated_executor(const T& t, const Executor& ex = Executor())
   if constexpr(associated_executor<T, Executor>::value)
   {
     static_assert(std::is_convertible<T&, execution_context&>::value);
+    static_assert(std::is_member_function_pointer<decltype(&T::get_executor)>::value);
     static_assert(
-      std::is_member_function_pointer<decltype(&T::get_executor)>::value);
-    static_assert(
-      detail::is_executor<
-        typename associated_executor<T, Executor>::executor_type>::value);
+      detail::is_executor<typename associated_executor<T, Executor>::executor_type>::value);
     return const_cast<T*>(&t)->get_executor();
   }
   else
@@ -49,7 +46,6 @@ auto get_associated_executor(const T& t, const Executor& ex = Executor())
 }
 
 template <typename T, typename Executor = system_executor>
-using associated_executor_t =
-  typename associated_executor<T, Executor>::executor_type;
+using associated_executor_t = typename associated_executor<T, Executor>::executor_type;
 }  // namespace boost::asio
 #endif

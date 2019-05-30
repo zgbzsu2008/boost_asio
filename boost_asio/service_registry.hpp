@@ -22,10 +22,14 @@ class service_registry
   void shutdown_services();
   void destroy_services();
 
-  template <typename Service> Service& use_service();
-  template <typename Service> Service& use_service(io_context& ioc);
-  template <typename Service> void add_service(Service* new_service);
-  template <typename Service> bool has_service();
+  template <typename Service>
+  Service& use_service();
+  template <typename Service>
+  Service& use_service(io_context& ioc);
+  template <typename Service>
+  void add_service(Service* new_service);
+  template <typename Service>
+  bool has_service();
 
  private:
   mutable std::mutex mutex_;
@@ -33,7 +37,8 @@ class service_registry
   std::map<std::string, service*> services_;
 };
 
-template <typename Service> inline Service& service_registry::use_service()
+template <typename Service>
+inline Service& service_registry::use_service()
 {
   std::string key = Service::key();
   std::unique_lock<std::mutex> lock(mutex_);
@@ -90,7 +95,8 @@ inline void service_registry::add_service(Service* new_service)
   services_[key] = new_service;
 }
 
-template <typename Service> inline bool service_registry::has_service()
+template <typename Service>
+inline bool service_registry::has_service()
 {
   std::string key = Service::key();
   std::lock_guard<std::mutex> lock(mutex_);

@@ -54,7 +54,7 @@ class event : private noncopyable
   {
     assert(lock.owns_lock());
     (void)lock;
-    state_ &= ~std::size_t(1);
+    state_ &= ~size_t(1);
   }
 
   void wait(std::unique_lock<std::mutex>& lock)
@@ -82,14 +82,14 @@ class event : private noncopyable
   class waiter
   {
    public:
-    explicit waiter(std::size_t& state) : state_(state) { state_ += 2; }
+    explicit waiter(size_t& state) : state_(state) { state_ += 2; }
     ~waiter() { state_ -= 2; }
 
    private:
-    std::size_t& state_;
+    size_t& state_;
   };
 
-  std::size_t state_ = 0;
+  size_t state_ = 0;
   std::condition_variable cond_;
 };
 }  // namespace boost::asio::detail

@@ -16,13 +16,7 @@ namespace boost::asio::detail
 class epoll_reactor : public execution_context_service_base<epoll_reactor>
 {
  public:
-  enum op_types {
-    read_op = 0,
-    write_op = 1,
-    connect_op = 1,
-    except_op = 2,
-    max_ops = 3
-  };
+  enum op_types { read_op = 0, write_op = 1, connect_op = 1, except_op = 2, max_ops = 3 };
 
   class descriptor_state : operation
   {
@@ -41,9 +35,8 @@ class epoll_reactor : public execution_context_service_base<epoll_reactor>
     void add_ready_events(uint32_t events) { task_result_ |= events; }
     operation* perform_io(uint32_t events);
 
-    static void do_complete(void* owner, operation* base,
-                            const std::error_code& ec,
-                            std::size_t bytes_transferred);
+    static void do_complete(void* owner, operation* base, const std::error_code& ec,
+                            size_t bytes_transferred);
   };
   using pre_descriptor_data = descriptor_state*;
   using socket_type = int;
@@ -58,25 +51,20 @@ class epoll_reactor : public execution_context_service_base<epoll_reactor>
   void interrupt();
   void post_immediate_completion(reactor_op* op, bool is_continuation);
 
-  int register_descriptor(socket_type descriptor,
-                          pre_descriptor_data& descriptor_data);
+  int register_descriptor(socket_type descriptor, pre_descriptor_data& descriptor_data);
 
   int register_internal_descriptor(int op_type, socket_type descriptor,
-                                   pre_descriptor_data& descriptor_data,
-                                   reactor_op* op);
+                                   pre_descriptor_data& descriptor_data, reactor_op* op);
 
-  void start_op(int op_type, socket_type descriptor,
-                pre_descriptor_data& descriptor_data, reactor_op* op,
-                bool is_continuation, bool allow_speculative);
+  void start_op(int op_type, socket_type descriptor, pre_descriptor_data& descriptor_data,
+                reactor_op* op, bool is_continuation, bool allow_speculative);
 
   void cancel_ops(socket_type descriptor, pre_descriptor_data& descriptor_data);
 
-  void deregister_descriptor(socket_type descriptor,
-                             pre_descriptor_data& descriptor_data,
+  void deregister_descriptor(socket_type descriptor, pre_descriptor_data& descriptor_data,
                              bool closing);
 
-  void deregister_internal_descriptor(socket_type descriptor,
-                                      pre_descriptor_data& descriptor_data);
+  void deregister_internal_descriptor(socket_type descriptor, pre_descriptor_data& descriptor_data);
 
   void cleanup_descriptor_data(pre_descriptor_data& descriptor_data);
 

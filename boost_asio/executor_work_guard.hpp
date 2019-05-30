@@ -7,14 +7,14 @@
 
 namespace boost::asio
 {
-template <typename Executor> class executor_work_guard
+template <typename Executor>
+class executor_work_guard
 {
  public:
   using executor_type = Executor;
   executor_type get_executor() const { return executor_; }
 
-  explicit executor_work_guard(const executor_type& e)
-    : executor_(e), owns_(true)
+  explicit executor_work_guard(const executor_type& e) : executor_(e), owns_(true)
   {
     executor_.on_work_started();
   }
@@ -68,8 +68,7 @@ inline auto make_work_guard(T& t, Executor e = Executor())
   else if constexpr(associated_executor<T, Executor>::value)
   {
     static_assert(std::is_convertible<T&, execution_context&>::value);
-    static_assert(
-      std::is_member_function_pointer<decltype(&T::get_executor)>::value);
+    static_assert(std::is_member_function_pointer<decltype(&T::get_executor)>::value);
     return executor_work_guard<associated_executor_t<T>>(t.get_executor());
   }
   else

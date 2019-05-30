@@ -19,8 +19,7 @@ void init_task(io_context& ioc)
 void print(int idx)
 {
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  std::cout << std::setw(4) << idx << " tid = " << std::this_thread::get_id()
-            << std::endl;
+  std::cout << std::setw(4) << idx << " tid = " << std::this_thread::get_id() << std::endl;
 }
 
 int main()

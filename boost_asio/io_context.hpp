@@ -27,10 +27,11 @@ class io_context : public execution_context
 
   executor_type get_executor();
 
-  std::size_t run();
+  size_t run();
 
  private:
-  template <typename Service> friend Service& use_service(io_context& ioc);
+  template <typename Service>
+  friend Service& use_service(io_context& ioc);
 
   impl_type& add_impl(impl_type* impl);
   impl_type& impl_;
@@ -53,10 +54,7 @@ class io_context::executor_type
   template <typename Function, typename Alloc>
   void defer(Function&& func, const Alloc& a) const;
 
-  bool running_in_this_thread() const
-  {
-    return io_context_.impl_.can_dispatch();
-  }
+  bool running_in_this_thread() const { return io_context_.impl_.can_dispatch(); }
 
  private:
   friend class io_context;
@@ -82,18 +80,17 @@ class io_context::service : public execution_context::service
 namespace detail
 {
 template <typename Type>
-class io_context_service_base : public io_context::service
+class service_base : public io_context::service
 {
  public:
-  io_context_service_base(io_context& io) : io_context::service(io) {}
+  service_base(io_context& io) : io_context::service(io) {}
 
   static std::string key() { return typeid(Type).name(); }
 };
 }  // namespace detail
 
 template <typename Function, typename Alloc>
-inline void io_context::executor_type::dispatch(Function&& func,
-                                                const Alloc& a) const
+inline void io_context::executor_type::dispatch(Function&& func, const Alloc& a) const
 {
   if(running_in_this_thread())
   {
@@ -111,8 +108,7 @@ inline void io_context::executor_type::dispatch(Function&& func,
 }
 
 template <typename Function, typename Alloc>
-inline void io_context::executor_type::post(Function&& func,
-                                            const Alloc& a) const
+inline void io_context::executor_type::post(Function&& func, const Alloc& a) const
 {
   using op = detail::executor_op<Function, Alloc>;
   typename op::ptr p = {std::addressof(a), op::ptr::allocate(a), 0};
@@ -123,8 +119,7 @@ inline void io_context::executor_type::post(Function&& func,
 }
 
 template <typename Function, typename Alloc>
-inline void io_context::executor_type::defer(Function&& func,
-                                             const Alloc& a) const
+inline void io_context::executor_type::defer(Function&& func, const Alloc& a) const
 {
   using op = detail::executor_op<Function, Alloc, detail::operation>;
   typename op::ptr p = {std::addressof(a), op::ptr::allocate(a), 0};

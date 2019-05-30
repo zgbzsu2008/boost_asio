@@ -24,7 +24,8 @@ class execution_context : private detail::noncopyable
   void shutdown();
   void destroy();
 
-  template <typename Service> friend Service& use_service(execution_context& e);
+  template <typename Service>
+  friend Service& use_service(execution_context& e);
 
   template <typename Service, typename... Args>
   friend Service& make_service(execution_context& e, Args&&... args);
@@ -32,7 +33,8 @@ class execution_context : private detail::noncopyable
   template <typename Service>
   friend void add_service(execution_context& e, Service* new_service);
 
-  template <typename Service> friend bool has_service(execution_context& e);
+  template <typename Service>
+  friend bool has_service(execution_context& e);
 
  protected:
   std::unique_ptr<detail::service_registry> service_registry_;
@@ -62,10 +64,7 @@ template <typename Type>
 class execution_context_service_base : public execution_context::service
 {
  public:
-  execution_context_service_base(execution_context& e)
-    : execution_context::service(e)
-  {
-  }
+  execution_context_service_base(execution_context& e) : execution_context::service(e) {}
 
   static std::string key() { return typeid(Type).name(); }
 };

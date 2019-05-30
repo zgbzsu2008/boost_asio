@@ -59,9 +59,7 @@ scheduler::scheduler(execution_context& ctx, int concurrency_hint)
 {
 }
 
-scheduler::~scheduler()
-{
-}
+scheduler::~scheduler() {}
 
 void scheduler::shutdown()
 {
@@ -91,7 +89,7 @@ void scheduler::init_task()
   }
 }
 
-std::size_t scheduler::run(std::error_code& ec)
+size_t scheduler::run(std::error_code& ec)
 {
   ec = std::error_code();
   if(outstanding_work_ == 0)
@@ -105,10 +103,10 @@ std::size_t scheduler::run(std::error_code& ec)
   thread_call_stack::context ctx(this, this_thread);
   std::unique_lock<std::mutex> lock(mutex_);
 
-  std::size_t n = 0;
+  size_t n = 0;
   for(; do_run_one(lock, this_thread, ec); lock.lock())
   {
-    if(n != (std::numeric_limits<std::size_t>::max)())
+    if(n != (std::numeric_limits<size_t>::max)())
     {
       ++n;
     }
@@ -116,16 +114,15 @@ std::size_t scheduler::run(std::error_code& ec)
   return n;
 }
 
-std::size_t scheduler::do_run_one(std::unique_lock<std::mutex>& lock,
-                                  thread_info& this_thread,
-                                  const std::error_code& ec)
+size_t scheduler::do_run_one(std::unique_lock<std::mutex>& lock, thread_info& this_thread,
+                             const std::error_code& ec)
 {
   while(!stopped_)
   {
     if(!op_queue_.empty())
     {
-      std::cout << "scheduler::do_run_one(): working... pid= "
-                << std::this_thread::get_id() << std::endl;
+      std::cout << "scheduler::do_run_one(): working... pid= " << std::this_thread::get_id()
+                << std::endl;
       operation* o = op_queue_.front();
       op_queue_.pop();
       bool more_handlers = (!op_queue_.empty());
@@ -158,15 +155,15 @@ std::size_t scheduler::do_run_one(std::unique_lock<std::mutex>& lock,
         work_cleanup on_exit = {this, &lock, &this_thread};
         (void)on_exit;
 
-        std::size_t task_result = o->task_result_;
+        size_t task_result = o->task_result_;
         o->complete(this, ec, task_result);
         return 1;
       }
     }
     else
     {
-      std::cout << "scheduler::do_run_one(): waiting... pid= "
-                << std::this_thread::get_id() << std::endl;
+      std::cout << "scheduler::do_run_one(): waiting... pid= " << std::this_thread::get_id()
+                << std::endl;
       wakeup_event_.clear(lock);
       wakeup_event_.wait(lock);
     }

@@ -14,8 +14,7 @@ namespace boost::asio::detail
 struct scheduler_thread_info;
 class epoll_reactor;
 
-class scheduler : public execution_context_service_base<scheduler>,
-                  public thread_context
+class scheduler : public execution_context_service_base<scheduler>, public thread_context
 {
  public:
   using thread_info = scheduler_thread_info;
@@ -26,9 +25,9 @@ class scheduler : public execution_context_service_base<scheduler>,
   void shutdown();
   void init_task();
 
-  std::size_t run(std::error_code& ec);
-  std::size_t do_run_one(std::unique_lock<std::mutex>& lock,
-                         thread_info& this_thread, const std::error_code& ec);
+  size_t run(std::error_code& ec);
+  size_t do_run_one(std::unique_lock<std::mutex>& lock, thread_info& this_thread,
+                    const std::error_code& ec);
   void stop();
   bool stopped() const;
   void restart();
@@ -75,7 +74,7 @@ class scheduler : public execution_context_service_base<scheduler>,
   } task_operation_;
 
   bool task_interrupted_;
-  std::atomic<std::size_t> outstanding_work_;
+  std::atomic<size_t> outstanding_work_;
   op_queue<operation> op_queue_;
 
   bool stopped_;

@@ -8,7 +8,8 @@
 
 namespace boost::asio::detail
 {
-template <typename Key, typename Value = unsigned char> class call_stack
+template <typename Key, typename Value = unsigned char>
+class call_stack
 {
  public:
   class context : private noncopyable
@@ -67,7 +68,6 @@ template <typename Key, typename Value = unsigned char> class call_stack
 };
 
 template <typename Key, typename Value>
-thread_local
-  typename call_stack<Key, Value>::context* call_stack<Key, Value>::top_ = 0;
+thread_local typename call_stack<Key, Value>::context* call_stack<Key, Value>::top_ = 0;
 }  // namespace boost::asio::detail
 #endif

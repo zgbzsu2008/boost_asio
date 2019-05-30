@@ -13,10 +13,7 @@ class fenced_block : private noncopyable
   enum full_t { full };
 
   explicit fenced_block(half_t) {}
-  explicit fenced_block(full_t)
-  {
-    std::atomic_thread_fence(std::memory_order_acquire);
-  }
+  explicit fenced_block(full_t) { std::atomic_thread_fence(std::memory_order_acquire); }
 
   ~fenced_block() { std::atomic_thread_fence(std::memory_order_release); }
 };

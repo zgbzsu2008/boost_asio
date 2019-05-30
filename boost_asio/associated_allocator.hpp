@@ -22,8 +22,7 @@ struct associated_allocator : std::false_type
 };
 
 template <typename T, typename E>
-struct associated_allocator<T, E, std::void_t<typename T::allocator_type>>
-  : std::true_type
+struct associated_allocator<T, E, std::void_t<typename T::allocator_type>> : std::true_type
 {
   using allocator_type = typename T::allocator_type;
 };
@@ -33,8 +32,7 @@ auto get_associated_allocator(const T& t, const Alloc& a = Alloc())
 {
   if constexpr(associated_allocator<T, Alloc>::value)
   {
-    static_assert(
-      std::is_member_function_pointer<decltype(&T::get_allocator)>::value);
+    static_assert(std::is_member_function_pointer<decltype(&T::get_allocator)>::value);
     return t.get_allocator();
   }
   else
@@ -44,8 +42,7 @@ auto get_associated_allocator(const T& t, const Alloc& a = Alloc())
 }
 
 template <typename T, typename Alloc = std::allocator<void>>
-using associated_allocator_t =
-  typename associated_allocator<T, Alloc>::allocator_type;
+using associated_allocator_t = typename associated_allocator<T, Alloc>::allocator_type;
 
 }  // namespace boost::asio
 #endif

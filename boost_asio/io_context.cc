@@ -14,8 +14,7 @@ io_context::impl_type& io_context::add_impl(io_context::impl_type* impl)
 }
 
 io_context::io_context()
-  : impl_(
-      add_impl(new impl_type(*this, 1 + std::thread::hardware_concurrency())))
+  : impl_(add_impl(new impl_type(*this, 1 + std::thread::hardware_concurrency())))
 {
 }
 
@@ -24,16 +23,11 @@ io_context::io_context(int concurrency_hint)
 {
 }
 
-io_context::~io_context()
-{
-}
+io_context::~io_context() {}
 
-io_context::executor_type io_context::get_executor()
-{
-  return executor_type(*this);
-}
+io_context::executor_type io_context::get_executor() { return executor_type(*this); }
 
-std::size_t io_context::run()
+size_t io_context::run()
 {
   std::error_code ec;
   auto n = impl_.run(ec);

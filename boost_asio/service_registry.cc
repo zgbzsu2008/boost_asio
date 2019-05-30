@@ -2,9 +2,7 @@
 
 namespace boost::asio::detail
 {
-service_registry::service_registry(execution_context& context) : owner_(context)
-{
-}
+service_registry::service_registry(execution_context& context) : owner_(context) {}
 
 void service_registry::shutdown_services()
 {

@@ -8,14 +8,8 @@
 
 namespace boost::asio::detail
 {
-select_interrupter::select_interrupter()
-{
-  open_descriptors();
-}
-select_interrupter::~select_interrupter()
-{
-  close_descriptors();
-}
+select_interrupter::select_interrupter() { open_descriptors(); }
+select_interrupter::~select_interrupter() { close_descriptors(); }
 
 void select_interrupter::recreate()
 {

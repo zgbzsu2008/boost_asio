@@ -19,8 +19,7 @@ struct system_context::thread_function
   }
 };
 
-system_context::system_context()
-  : scheduler_(use_service<detail::scheduler>(*this))
+system_context::system_context() : scheduler_(use_service<detail::scheduler>(*this))
 {
   scheduler_.work_started();
 
@@ -36,20 +35,11 @@ system_context::~system_context()
   threads_.join();
 }
 
-system_context::executor_type system_context::get_executor()
-{
-  return executor_type();
-}
+system_context::executor_type system_context::get_executor() { return executor_type(); }
 
-void system_context::stop()
-{
-  scheduler_.stop();
-}
+void system_context::stop() { scheduler_.stop(); }
 
-bool system_context::stopped() const
-{
-  return scheduler_.stopped();
-}
+bool system_context::stopped() const { return scheduler_.stopped(); }
 
 void system_context::join()
 {

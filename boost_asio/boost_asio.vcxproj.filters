@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="epoll_reactor.cc" />
+    <ClCompile Include="execution_context.cc" />
+    <ClCompile Include="io_context.cc" />
+    <ClCompile Include="main.cc" />
+    <ClCompile Include="scheduler.cc" />
+    <ClCompile Include="select_interrupter.cc" />
+    <ClCompile Include="service_registry.cc" />
+    <ClCompile Include="system_context.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="associated_allocator.hpp" />
+    <ClInclude Include="associated_executor.hpp" />
+    <ClInclude Include="async_result.hpp" />
+    <ClInclude Include="call_stack.hpp" />
+    <ClInclude Include="epoll_reactor.hpp" />
+    <ClInclude Include="event.hpp" />
+    <ClInclude Include="execution_context.hpp" />
+    <ClInclude Include="executor_op.hpp" />
+    <ClInclude Include="executor_work_guard.hpp" />
+    <ClInclude Include="fenced_block.hpp" />
+    <ClInclude Include="global.hpp" />
+    <ClInclude Include="handler_invoke_helpers.hpp" />
+    <ClInclude Include="handler_invoke_hook.hpp" />
+    <ClInclude Include="io_context.hpp" />
+    <ClInclude Include="is_executor.hpp" />
+    <ClInclude Include="noncopyable.hpp" />
+    <ClInclude Include="op_queue.hpp" />
+    <ClInclude Include="post.hpp" />
+    <ClInclude Include="reactor_op.hpp" />
+    <ClInclude Include="recycling_allocator.hpp" />
+    <ClInclude Include="scheduler.hpp" />
+    <ClInclude Include="scheduler_operation.hpp" />
+    <ClInclude Include="scheduler_thread_info.hpp" />
+    <ClInclude Include="select_interrupter.hpp" />
+    <ClInclude Include="service_registry.hpp" />
+    <ClInclude Include="service_registry_helpers.hpp" />
+    <ClInclude Include="system_context.hpp" />
+    <ClInclude Include="system_executor.hpp" />
+    <ClInclude Include="thread_context.hpp" />
+    <ClInclude Include="thread_group.hpp" />
+    <ClInclude Include="thread_info_base.hpp" />
+    <ClInclude Include="work_dispatcher.hpp" />
+    <ClInclude Include="tcp.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="address.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="address_v4.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="endpoint.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="basic_endpoint.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="basic_stream_socket.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="stream_socket_service.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="basic_socket.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="basic_io_object.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="socket_base.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="socket_ops.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="tcp">
+      <UniqueIdentifier>{a16e47d3-015a-4bb9-8f71-30980353e5e1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

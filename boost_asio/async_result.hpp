@@ -5,7 +5,8 @@
 
 namespace boost::asio
 {
-template <typename T, typename S> class async_result
+template <typename T, typename S>
+class async_result
 {
  public:
   using handler_type = T;
@@ -19,27 +20,24 @@ template <typename T, typename S> class async_result
   async_result& operator=(const async_result&) = delete;
 };
 
-template <typename T, typename S> class async_completion
+template <typename T, typename S>
+class async_completion
 {
  private:
   using type = typename async_result<typename std::decay_t<T>, S>::handler_type;
 
  public:
 #if defined(BOOST_ASIO_HAS_MOVE)
-  using handler_type =
-    typename std::conditional_t<std::is_same_v<T, type>, type&, type>;
+  using handler_type = typename std::conditional_t<std::is_same_v<T, type>, type&, type>;
   explicit async_completion(T& token)
-    : handler_(static_cast<typename std::conditional_t<std::is_same_v<T, type>,
-                                                       type&, T&&>>(token)),
+    : handler_(
+        static_cast<typename std::conditional_t<std::is_same_v<T, type>, type&, T&&>>(token)),
       result_(handler_)
   {
   }
 #else
   using handler_type = type;
-  explicit async_completion(typename std::decay_t<T>& token)
-    : handler_(token), result_(handler_)
-  {
-  }
+  explicit async_completion(typename std::decay_t<T>& token) : handler_(token), result_(handler_) {}
   explicit async_completion(const typename std::decay_t<T>& token)
     : handler_(token), result_(handler_)
   {
@@ -52,8 +50,7 @@ template <typename T, typename S> class async_completion
 namespace detail
 {
 template <typename T, typename S>
-struct async_result_helper
-  : public async_result<typename std::decay<T>::type, S>
+struct async_result_helper : public async_result<typename std::decay<T>::type, S>
 {
 };
 }  // namespace detail

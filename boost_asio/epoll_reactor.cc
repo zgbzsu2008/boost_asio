@@ -10,8 +10,7 @@
 namespace boost::asio::detail
 {
 epoll_reactor::epoll_reactor(execution_context& ctx)
-  : execution_context_service_base(ctx),
-    scheduler_(use_service<scheduler>(ctx)), interrupter_(),
+  : execution_context_service_base(ctx), scheduler_(use_service<scheduler>(ctx)), interrupter_(),
     epoll_fd_(do_epoll_create()), shutdown_(false), mutex_()
 {
   epoll_event ev = {0, {0}};
@@ -35,8 +34,7 @@ void epoll_reactor::shutdown()
   shutdown_ = true;
   lock.unlock();
   op_queue<operation> ops;
-  for(auto it = registered_descriptors_.begin();
-      it != registered_descriptors_.end(); ++it)
+  for(auto it = registered_descriptors_.begin(); it != registered_descriptors_.end(); ++it)
   {
     for(int i = 0; i < max_ops; ++i)
     {
@@ -47,10 +45,7 @@ void epoll_reactor::shutdown()
   }
 }
 
-void epoll_reactor::init_task()
-{
-  scheduler_.init_task();
-}
+void epoll_reactor::init_task() { scheduler_.init_task(); }
 
 void epoll_reactor::run(long usec, op_queue<operation>& ops)
 {
@@ -68,14 +63,13 @@ void epoll_reactor::run(long usec, op_queue<operation>& ops)
     void* ptr = events[i].data.ptr;
     if(ptr == &interrupter_)
     {
-      std::cout << "epoll_reactor::run(): interrupter fd = "
-                << interrupter_.fd() << std::endl;
+      std::cout << "epoll_reactor::run(): interrupter fd = " << interrupter_.fd() << std::endl;
     }
     else
     {
       auto descriptor_data = static_cast<pre_descriptor_data>(ptr);
-      std::cout << "epoll_reactor::run(): descriptor_state fd = "
-                << descriptor_data->descriptor_ << std::endl;
+      std::cout << "epoll_reactor::run(): descriptor_state fd = " << descriptor_data->descriptor_
+                << std::endl;
       if(!ops.is_enqueued(descriptor_data))
       {
         descriptor_data->set_ready_events(events[i].events);
@@ -95,18 +89,15 @@ void epoll_reactor::interrupt()
   ev.events = EPOLLIN | EPOLLERR | EPOLLET;
   ev.data.ptr = &interrupter_;
   ::epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, interrupter_.fd(), &ev);
-  std::cout << "epoll_reactor::interrupt(): fd = " << interrupter_.fd()
-            << std::endl;
+  std::cout << "epoll_reactor::interrupt(): fd = " << interrupter_.fd() << std::endl;
 }
 
-void epoll_reactor::post_immediate_completion(reactor_op* op,
-                                              bool is_continuation)
+void epoll_reactor::post_immediate_completion(reactor_op* op, bool is_continuation)
 {
   scheduler_.post_immediate_completion(op, is_continuation);
 }
 
-int epoll_reactor::register_descriptor(socket_type descriptor,
-                                       pre_descriptor_data& descriptor_data)
+int epoll_reactor::register_descriptor(socket_type descriptor, pre_descriptor_data& descriptor_data)
 {
   descriptor_data = new descriptor_state(true);
   {
@@ -137,9 +128,9 @@ int epoll_reactor::register_descriptor(socket_type descriptor,
   return 0;
 }
 
-int epoll_reactor::register_internal_descriptor(
-  int op_type, socket_type descriptor, pre_descriptor_data& descriptor_data,
-  reactor_op* op)
+int epoll_reactor::register_internal_descriptor(int op_type, socket_type descriptor,
+                                                pre_descriptor_data& descriptor_data,
+                                                reactor_op* op)
 {
   descriptor_data = new descriptor_state(true);
   {
@@ -167,14 +158,94 @@ int epoll_reactor::register_internal_descriptor(
 }
 
 void epoll_reactor::start_op(int op_type, socket_type descriptor,
-                             pre_descriptor_data& descriptor_data,
-                             reactor_op* op, bool is_continuation,
-                             bool allow_speculative)
+                             pre_descriptor_data& descriptor_data, reactor_op* op,
+                             bool is_continuation, bool allow_speculative)
 {
+  if(!descriptor_data)
+  {
+    op->ec_ = std::make_error_code(std::errc::bad_file_descriptor);
+    post_immediate_completion(op, is_continuation);
+    return;
+  }
+
+  std::unique_lock<std::mutex> lock(descriptor_data->mutex_);
+  if(descriptor_data->shutdown_)
+  {
+    post_immediate_completion(op, is_continuation);
+    return;
+  }
+
+  if(descriptor_data->op_queue_[op_type].empty())
+  {
+    if(allow_speculative && (op_type != read_op || descriptor_data->op_queue_[except_op].empty()))
+    {
+      if(descriptor_data->try_speculative_[op_type])
+      {
+        if(reactor_op::status status = op->perform())
+        {
+          if(status == reactor_op::done_and_exhausted)
+          {
+            if(descriptor_data->registered_events_ != 0)
+            {
+              descriptor_data->try_speculative_[op_type] = false;
+            }
+          }
+          lock.unlock();
+          scheduler_.post_immediate_completion(op, is_continuation);
+          return;
+        }
+      }
+
+      if(descriptor_data->registered_events_ == 0)
+      {
+        op->ec_ = std::make_error_code(std::errc::not_supported);
+        scheduler_.post_immediate_completion(op, is_continuation);
+        return;
+      }
+
+      if(op_type == write_op)
+      {
+        if((descriptor_data->registered_events_ & EPOLLOUT) == 0)
+        {
+          epoll_event ev = {0, {0}};
+          ev.events = descriptor_data->registered_events_ | EPOLLOUT;
+          ev.data.ptr = descriptor_data;
+          if(::epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, descriptor, &ev) == 0)
+          {
+            descriptor_data->registered_events_ |= ev.events;
+          }
+          else
+          {
+            op->ec_ = std::error_code(errno, std::generic_category());
+            scheduler_.post_immediate_completion(op, is_continuation);
+            return;
+          }
+        }
+      }
+    }
+    else if(descriptor_data->registered_events_ == 0)
+    {
+      op->ec_ = std::make_error_code(std::errc::not_supported);
+      scheduler_.post_immediate_completion(op, is_continuation);
+      return;
+    }
+    else
+    {
+      if(op_type == write_op)
+      {
+        descriptor_data->registered_events_& EPOLLOUT;
+      }
+      epoll_event ev = {0, {0}};
+      ev.events = descriptor_data->registered_events_ | EPOLLOUT;
+      ev.data.ptr = descriptor_data;
+      ::epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, descriptor, &ev);
+    }
+  }
+  descriptor_data->op_queue_[op_type].push(op);
+  scheduler_.work_started();
 }
 
-void epoll_reactor::cancel_ops(socket_type,
-                               pre_descriptor_data& descriptor_data)
+void epoll_reactor::cancel_ops(socket_type, pre_descriptor_data& descriptor_data)
 {
   if(!descriptor_data)
   {
@@ -197,8 +268,7 @@ void epoll_reactor::cancel_ops(socket_type,
 }
 
 void epoll_reactor::deregister_descriptor(socket_type descriptor,
-                                          pre_descriptor_data& descriptor_data,
-                                          bool closing)
+                                          pre_descriptor_data& descriptor_data, bool closing)
 {
   if(!descriptor_data)
   {
@@ -241,8 +311,8 @@ void epoll_reactor::deregister_descriptor(socket_type descriptor,
   }
 }
 
-void epoll_reactor::deregister_internal_descriptor(
-  socket_type descriptor, pre_descriptor_data& descriptor_data)
+void epoll_reactor::deregister_internal_descriptor(socket_type descriptor,
+                                                   pre_descriptor_data& descriptor_data)
 {
   if(!descriptor_data)
   {
@@ -277,8 +347,7 @@ int epoll_reactor::do_epoll_create()
   int fd = ::epoll_create1(EPOLL_CLOEXEC);
   if(fd < 0)
   {
-    std::cout << "EPoller::do_epoll_create(): epoll_create1 failed."
-              << std::endl;
+    std::cout << "EPoller::do_epoll_create(): epoll_create1 failed." << std::endl;
     std::error_code ec(errno, std::generic_category());
     throw ec;
   }
@@ -287,10 +356,7 @@ int epoll_reactor::do_epoll_create()
 
 struct epoll_reactor::perform_io_cleanup_on_block_exit
 {
-  explicit perform_io_cleanup_on_block_exit(epoll_reactor* r)
-    : reactor_(r), first_op_(0)
-  {
-  }
+  explicit perform_io_cleanup_on_block_exit(epoll_reactor* r) : reactor_(r), first_op_(0) {}
   ~perform_io_cleanup_on_block_exit()
   {
     if(first_op_)
@@ -353,7 +419,7 @@ operation* epoll_reactor::descriptor_state::perform_io(uint32_t events)
 
 void epoll_reactor::descriptor_state::do_complete(void* owner, operation* base,
                                                   const std::error_code& ec,
-                                                  std::size_t bytes_transferred)
+                                                  size_t bytes_transferred)
 {
   if(owner)
   {
