@@ -5,13 +5,13 @@ namespace boost::asio::detail
 {
 class noncopyable
 {
-protected:
-    noncopyable() = default;
-    ~noncopyable() = default;
+ protected:
+  noncopyable() = default;
+  ~noncopyable() = default;
 
-private:
-    noncopyable(const noncopyable&) = delete;
-    const noncopyable& operator=(const noncopyable&) = delete;
+ private:
+  noncopyable(const noncopyable&) = delete;
+  const noncopyable& operator=(const noncopyable&) = delete;
 };
 }  // namespace boost::asio::detail
 #endif

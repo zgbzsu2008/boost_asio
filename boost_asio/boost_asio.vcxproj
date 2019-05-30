@@ -86,6 +86,8 @@
     <ClInclude Include="executor_work_guard.hpp" />
     <ClInclude Include="fenced_block.hpp" />
     <ClInclude Include="global.hpp" />
+    <ClInclude Include="handler_invoke_helpers.hpp" />
+    <ClInclude Include="handler_invoke_hook.hpp" />
     <ClInclude Include="io_context.hpp" />
     <ClInclude Include="is_executor.hpp" />
     <ClInclude Include="noncopyable.hpp" />

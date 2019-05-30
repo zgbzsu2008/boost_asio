@@ -10,39 +10,39 @@ namespace boost::asio::detail
 {
 class thread_info_base : private noncopyable
 {
-public:
-    thread_info_base() : in_use_(false) {}
+ public:
+  thread_info_base() : in_use_(false) {}
 
-    static void* allocate(thread_info_base* this_thread, std::size_t size)
+  static void* allocate(thread_info_base* this_thread, std::size_t size)
+  {
+    if(this_thread && (!this_thread->in_use_) && (size < sizeof(storage_)))
     {
-        if(this_thread && !this_thread->in_use_ && (size < sizeof(storage_)))
-        {
-            this_thread->in_use_ = true;
-            return &this_thread->storage_;
-        }
-        else
-        {
-            return ::operator new(size);
-        }
+      this_thread->in_use_ = true;
+      return &this_thread->storage_;
     }
-
-    static void deallocate(thread_info_base* this_thread, void* pointer,
-                           std::size_t size)
+    else
     {
-        if(this_thread && pointer == &this_thread->storage_ &&
-           (size < sizeof(storage_)))
-        {
-            this_thread->in_use_ = false;
-        }
-        else
-        {
-            ::operator delete(pointer);
-        }
+      return ::operator new(size);
     }
+  }
 
-private:
-    std::aligned_storage<1024>::type storage_;
-    bool in_use_;
+  static void deallocate(thread_info_base* this_thread, void* pointer,
+                         std::size_t size)
+  {
+    if(this_thread && (pointer == &this_thread->storage_) &&
+       (size < sizeof(storage_)))
+    {
+      this_thread->in_use_ = false;
+    }
+    else
+    {
+      ::operator delete(pointer);
+    }
+  }
+
+ private:
+  std::aligned_storage<1024>::type storage_;
+  bool in_use_;
 };
 }  // namespace boost::asio::detail
 #endif

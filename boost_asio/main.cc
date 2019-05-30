@@ -1,5 +1,6 @@
 #include <chrono>
 #include <iostream>
+#include <iomanip>
 
 #include "epoll_reactor.hpp"
 #include "io_context.hpp"
@@ -11,29 +12,32 @@ using namespace boost::asio;
 
 void init_task(io_context& ioc)
 {
-    detail::epoll_reactor& reactor = use_service<detail::epoll_reactor>(ioc);
-    reactor.init_task();
+  detail::epoll_reactor& reactor = use_service<detail::epoll_reactor>(ioc);
+  reactor.init_task();
 }
 
 void print(int idx)
 {
-    std::cout << idx << "\ttid = " << std::this_thread::get_id() << std::endl;
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  std::cout << std::setw(4) << idx << " tid = " << std::this_thread::get_id()
+            << std::endl;
 }
 
 int main()
 {
-    io_context ioc;
-    detail::thread_group threads(std::bind(&io_context::run, std::ref(ioc)), 4);
+  io_context ioc;
+  executor_work_guard work = make_work_guard(ioc);
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+  detail::thread_group threads(std::bind(&io_context::run, std::ref(ioc)),
+                               std::thread::hardware_concurrency());
+  post(ioc, std::bind(init_task, std::ref(ioc)));
 
-    post(ioc, std::bind(init_task, std::ref(ioc)));
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  for(int i = 0; i < 100; ++i)
+  {
+    post(ioc, std::bind(print, i));
+  }
 
-    for(int i = 0; i < 10000; ++i)
-    {
-        post(ioc, std::bind(print, i));
-    }
-
-    ioc.run();
-    return 0;
+  ioc.run();
+  return 0;
 }
