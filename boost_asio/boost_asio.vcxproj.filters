@@ -9,6 +9,9 @@
     <ClCompile Include="select_interrupter.cc" />
     <ClCompile Include="service_registry.cc" />
     <ClCompile Include="system_context.cpp" />
+    <ClCompile Include="socket_ops.cc">
+      <Filter>tcp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="associated_allocator.hpp" />
@@ -74,6 +77,18 @@
       <Filter>tcp</Filter>
     </ClInclude>
     <ClInclude Include="socket_ops.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="socket_types.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="reactive_socket_service.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="reactive_socket_service_base.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="address_v6.hpp">
       <Filter>tcp</Filter>
     </ClInclude>
   </ItemGroup>

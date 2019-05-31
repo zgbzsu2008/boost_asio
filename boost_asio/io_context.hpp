@@ -27,7 +27,7 @@ class io_context : public execution_context
 
   executor_type get_executor();
 
-  size_t run();
+  std::size_t run();
 
  private:
   template <typename Service>

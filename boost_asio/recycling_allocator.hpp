@@ -25,13 +25,13 @@ class recycling_allocator
   {
   }
 
-  T* allocate(size_t n)
+  T* allocate(std::size_t n)
   {
     void* p = thread_info_base::allocate(thread_context::thread_call_stack::top(), sizeof(T) * n);
     return static_cast<T*>(p);
   }
 
-  void deallocate(T* p, size_t n)
+  void deallocate(T* p, std::size_t n)
   {
     thread_info_base::deallocate(thread_context::thread_call_stack::top(), p, sizeof(T) * n);
   }

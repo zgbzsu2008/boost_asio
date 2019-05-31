@@ -22,10 +22,7 @@ epoll_reactor::epoll_reactor(execution_context& ctx)
 
 epoll_reactor::~epoll_reactor()
 {
-  if(epoll_fd_ != -1)
-  {
-    ::close(epoll_fd_);
-  }
+  if(epoll_fd_ != -1) { ::close(epoll_fd_); }
 }
 
 void epoll_reactor::shutdown()
@@ -50,10 +47,7 @@ void epoll_reactor::init_task() { scheduler_.init_task(); }
 void epoll_reactor::run(long usec, op_queue<operation>& ops)
 {
   int timeout = 0;
-  if(usec)
-  {
-    timeout = int((usec < 0) ? -1 : ((usec - 1) / 1000 + 1));
-  }
+  if(usec) { timeout = int((usec < 0) ? -1 : ((usec - 1) / 1000 + 1)); }
 
   epoll_event events[128];
   int numEvents = ::epoll_wait(epoll_fd_, events, 128, timeout);
@@ -62,9 +56,7 @@ void epoll_reactor::run(long usec, op_queue<operation>& ops)
   {
     void* ptr = events[i].data.ptr;
     if(ptr == &interrupter_)
-    {
-      std::cout << "epoll_reactor::run(): interrupter fd = " << interrupter_.fd() << std::endl;
-    }
+    { std::cout << "epoll_reactor::run(): interrupter fd = " << interrupter_.fd() << std::endl; }
     else
     {
       auto descriptor_data = static_cast<pre_descriptor_data>(ptr);
@@ -150,10 +142,7 @@ int epoll_reactor::register_internal_descriptor(int op_type, socket_type descrip
   descriptor_data->registered_events_ = ev.events;
   ev.data.ptr = descriptor_data;
   int result = ::epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, descriptor, &ev);
-  if(result != 0)
-  {
-    return errno;
-  }
+  if(result != 0) { return errno; }
   return 0;
 }
 
@@ -186,9 +175,7 @@ void epoll_reactor::start_op(int op_type, socket_type descriptor,
           if(status == reactor_op::done_and_exhausted)
           {
             if(descriptor_data->registered_events_ != 0)
-            {
-              descriptor_data->try_speculative_[op_type] = false;
-            }
+            { descriptor_data->try_speculative_[op_type] = false; }
           }
           lock.unlock();
           scheduler_.post_immediate_completion(op, is_continuation);
@@ -211,9 +198,7 @@ void epoll_reactor::start_op(int op_type, socket_type descriptor,
           ev.events = descriptor_data->registered_events_ | EPOLLOUT;
           ev.data.ptr = descriptor_data;
           if(::epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, descriptor, &ev) == 0)
-          {
-            descriptor_data->registered_events_ |= ev.events;
-          }
+          { descriptor_data->registered_events_ |= ev.events; }
           else
           {
             op->ec_ = std::error_code(errno, std::generic_category());
@@ -231,10 +216,7 @@ void epoll_reactor::start_op(int op_type, socket_type descriptor,
     }
     else
     {
-      if(op_type == write_op)
-      {
-        descriptor_data->registered_events_& EPOLLOUT;
-      }
+      if(op_type == write_op) { descriptor_data->registered_events_ &= EPOLLOUT; }
       epoll_event ev = {0, {0}};
       ev.events = descriptor_data->registered_events_ | EPOLLOUT;
       ev.data.ptr = descriptor_data;
@@ -247,10 +229,7 @@ void epoll_reactor::start_op(int op_type, socket_type descriptor,
 
 void epoll_reactor::cancel_ops(socket_type, pre_descriptor_data& descriptor_data)
 {
-  if(!descriptor_data)
-  {
-    return;
-  }
+  if(!descriptor_data) { return; }
   std::unique_lock<std::mutex> lock(descriptor_data->mutex_);
 
   op_queue<operation> ops;
@@ -270,10 +249,7 @@ void epoll_reactor::cancel_ops(socket_type, pre_descriptor_data& descriptor_data
 void epoll_reactor::deregister_descriptor(socket_type descriptor,
                                           pre_descriptor_data& descriptor_data, bool closing)
 {
-  if(!descriptor_data)
-  {
-    return;
-  }
+  if(!descriptor_data) { return; }
 
   std::unique_lock<std::mutex> lock(descriptor_data->mutex_);
   if(!descriptor_data->shutdown_)
@@ -314,10 +290,7 @@ void epoll_reactor::deregister_descriptor(socket_type descriptor,
 void epoll_reactor::deregister_internal_descriptor(socket_type descriptor,
                                                    pre_descriptor_data& descriptor_data)
 {
-  if(!descriptor_data)
-  {
-    return;
-  }
+  if(!descriptor_data) { return; }
 
   std::unique_lock<std::mutex> lock(descriptor_data->mutex_);
   if(!descriptor_data->shutdown_)
@@ -361,10 +334,7 @@ struct epoll_reactor::perform_io_cleanup_on_block_exit
   {
     if(first_op_)
     {
-      if(!ops_.empty())
-      {
-        reactor_->scheduler_.post_deferred_completions(ops_);
-      }
+      if(!ops_.empty()) { reactor_->scheduler_.post_deferred_completions(ops_); }
     }
     else
     {
@@ -419,16 +389,13 @@ operation* epoll_reactor::descriptor_state::perform_io(uint32_t events)
 
 void epoll_reactor::descriptor_state::do_complete(void* owner, operation* base,
                                                   const std::error_code& ec,
-                                                  size_t bytes_transferred)
+                                                  std::size_t bytes_transferred)
 {
   if(owner)
   {
     auto data = static_cast<descriptor_state*>(base);
     uint32_t events = static_cast<uint32_t>(bytes_transferred);
-    if(auto op = data->perform_io(events))
-    {
-      op->complete(owner, ec, 0);
-    }
+    if(auto op = data->perform_io(events)) { op->complete(owner, ec, 0); }
   }
 }
 }  // namespace boost::asio::detail

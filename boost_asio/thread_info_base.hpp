@@ -13,7 +13,7 @@ class thread_info_base : private noncopyable
  public:
   thread_info_base() : in_use_(false) {}
 
-  static void* allocate(thread_info_base* this_thread, size_t size)
+  static void* allocate(thread_info_base* this_thread, std::size_t size)
   {
     if(this_thread && (!this_thread->in_use_) && (size < sizeof(storage_)))
     {
@@ -26,12 +26,10 @@ class thread_info_base : private noncopyable
     }
   }
 
-  static void deallocate(thread_info_base* this_thread, void* pointer, size_t size)
+  static void deallocate(thread_info_base* this_thread, void* pointer, std::size_t size)
   {
     if(this_thread && (pointer == &this_thread->storage_) && (size < sizeof(storage_)))
-    {
-      this_thread->in_use_ = false;
-    }
+    { this_thread->in_use_ = false; }
     else
     {
       ::operator delete(pointer);

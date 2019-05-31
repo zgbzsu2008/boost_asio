@@ -36,7 +36,7 @@ class epoll_reactor : public execution_context_service_base<epoll_reactor>
     operation* perform_io(uint32_t events);
 
     static void do_complete(void* owner, operation* base, const std::error_code& ec,
-                            size_t bytes_transferred);
+                            std::size_t bytes_transferred);
   };
   using pre_descriptor_data = descriptor_state*;
   using socket_type = int;

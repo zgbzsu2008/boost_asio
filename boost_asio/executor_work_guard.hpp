@@ -22,10 +22,7 @@ class executor_work_guard
   executor_work_guard(const executor_work_guard& other)
     : executor_(other.executor_), owns_(other.owns_)
   {
-    if(owns_)
-    {
-      executor_.on_work_started();
-    }
+    if(owns_) { executor_.on_work_started(); }
   }
 
   executor_work_guard(executor_work_guard&& other)
@@ -36,20 +33,14 @@ class executor_work_guard
 
   ~executor_work_guard()
   {
-    if(owns_)
-    {
-      executor_.on_work_finished();
-    }
+    if(owns_) { executor_.on_work_finished(); }
   }
 
   bool owns_work() const { return owns_; }
 
   void reset()
   {
-    if(owns_)
-    {
-      executor_.on_work_finished();
-    }
+    if(owns_) { executor_.on_work_finished(); }
   }
 
  private:
@@ -61,10 +52,7 @@ class executor_work_guard
 template <typename T, typename Executor = system_executor>
 inline auto make_work_guard(T& t, Executor e = Executor())
 {
-  if constexpr(detail::is_executor<T>::value)
-  {
-    return executor_work_guard<T>(t);
-  }
+  if constexpr(detail::is_executor<T>::value) { return executor_work_guard<T>(t); }
   else if constexpr(associated_executor<T, Executor>::value)
   {
     static_assert(std::is_convertible<T&, execution_context&>::value);

@@ -55,7 +55,8 @@ class executor_op : public Operation
   }
 
  private:
-  static void do_complete(void* owner, scheduler_operation* base, const std::error_code&, size_t)
+  static void do_complete(void* owner, scheduler_operation* base, const std::error_code&,
+                          std::size_t)
   {
     executor_op* o = static_cast<executor_op*>(base);
     ptr p = {std::addressof(o->alloc_), o, o};

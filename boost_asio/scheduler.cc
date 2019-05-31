@@ -14,9 +14,7 @@ struct scheduler::task_cleanup
   ~task_cleanup()
   {
     if(this_thread_->private_outstanding_work > 0)
-    {
-      scheduler_->outstanding_work_ += this_thread_->private_outstanding_work;
-    }
+    { scheduler_->outstanding_work_ += this_thread_->private_outstanding_work; }
     this_thread_->private_outstanding_work = 0;
 
     lock_->lock();
@@ -35,9 +33,7 @@ struct scheduler::work_cleanup
   ~work_cleanup()
   {
     if(this_thread_->private_outstanding_work > 0)
-    {
-      scheduler_->outstanding_work_ += this_thread_->private_outstanding_work;
-    }
+    { scheduler_->outstanding_work_ += this_thread_->private_outstanding_work; }
     this_thread_->private_outstanding_work = 0;
     scheduler_->work_finished();
 
@@ -70,10 +66,7 @@ void scheduler::shutdown()
   while(operation* o = op_queue_.front())
   {
     op_queue_.pop();
-    if(o != &task_operation_)
-    {
-      o->destroy();
-    }
+    if(o != &task_operation_) { o->destroy(); }
   }
   task_ = 0;
 }
@@ -89,7 +82,7 @@ void scheduler::init_task()
   }
 }
 
-size_t scheduler::run(std::error_code& ec)
+std::size_t scheduler::run(std::error_code& ec)
 {
   ec = std::error_code();
   if(outstanding_work_ == 0)
@@ -103,19 +96,16 @@ size_t scheduler::run(std::error_code& ec)
   thread_call_stack::context ctx(this, this_thread);
   std::unique_lock<std::mutex> lock(mutex_);
 
-  size_t n = 0;
+  std::size_t n = 0;
   for(; do_run_one(lock, this_thread, ec); lock.lock())
   {
-    if(n != (std::numeric_limits<size_t>::max)())
-    {
-      ++n;
-    }
+    if(n != (std::numeric_limits<std::size_t>::max)()) { ++n; }
   }
   return n;
 }
 
-size_t scheduler::do_run_one(std::unique_lock<std::mutex>& lock, thread_info& this_thread,
-                             const std::error_code& ec)
+std::size_t scheduler::do_run_one(std::unique_lock<std::mutex>& lock, thread_info& this_thread,
+                                  const std::error_code& ec)
 {
   while(!stopped_)
   {
@@ -129,10 +119,7 @@ size_t scheduler::do_run_one(std::unique_lock<std::mutex>& lock, thread_info& th
       if(o == &task_operation_)
       {
         task_interrupted_ = more_handlers;
-        if(more_handlers && !one_thread_)
-        {
-          wakeup_event_.unlock_and_signal_one(lock);
-        }
+        if(more_handlers && !one_thread_) { wakeup_event_.unlock_and_signal_one(lock); }
         else
         {
           lock.unlock();
@@ -144,10 +131,7 @@ size_t scheduler::do_run_one(std::unique_lock<std::mutex>& lock, thread_info& th
       }
       else
       {
-        if(more_handlers && !one_thread_)
-        {
-          wakeup_event_.unlock_and_signal_one(lock);
-        }
+        if(more_handlers && !one_thread_) { wakeup_event_.unlock_and_signal_one(lock); }
         else
         {
           lock.unlock();
@@ -155,7 +139,7 @@ size_t scheduler::do_run_one(std::unique_lock<std::mutex>& lock, thread_info& th
         work_cleanup on_exit = {this, &lock, &this_thread};
         (void)on_exit;
 
-        size_t task_result = o->task_result_;
+        std::size_t task_result = o->task_result_;
         o->complete(this, ec, task_result);
         return 1;
       }

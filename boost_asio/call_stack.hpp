@@ -32,10 +32,7 @@ class call_stack
     {
       for(context* elem = next_; elem != 0; elem = elem->next_)
       {
-        if(elem->key_ == key_)
-        {
-          return elem->value_;
-        }
+        if(elem->key_ == key_) { return elem->value_; }
       }
       return 0;
     }
@@ -53,10 +50,7 @@ class call_stack
   {
     for(context* elem = top_; elem != 0; elem = elem->next_)
     {
-      if(elem->key_ == k)
-      {
-        return elem->value_;
-      }
+      if(elem->key_ == k) { return elem->value_; }
     }
     return 0;
   }

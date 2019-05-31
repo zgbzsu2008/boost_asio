@@ -32,10 +32,7 @@ class thread_group : private noncopyable
   {
     for(auto& t : threads_)
     {
-      if(t.joinable())
-      {
-        t.joinable();
-      }
+      if(t.joinable()) { t.joinable(); }
     }
   }
 

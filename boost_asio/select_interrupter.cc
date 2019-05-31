@@ -32,10 +32,7 @@ bool select_interrupter::reset()
     uint64_t n(0);
     errno = 0;
     ssize_t result = ::read(fd_, &n, sizeof(uint64_t));
-    if(result < 0 && errno == EINTR)
-    {
-      continue;
-    }
+    if(result < 0 && errno == EINTR) { continue; }
     return result > 0;
   }
 }
@@ -43,17 +40,11 @@ bool select_interrupter::reset()
 void select_interrupter::open_descriptors()
 {
   fd_ = ::eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
-  if(fd_ < 0)
-  {
-    throw std::error_code{errno, std::generic_category()};
-  }
+  if(fd_ < 0) { throw std::error_code{errno, std::generic_category()}; }
 }
 
 void select_interrupter::close_descriptors()
 {
-  if(fd_ != -1)
-  {
-    ::close(fd_);
-  }
+  if(fd_ != -1) { ::close(fd_); }
 }
 }  // namespace boost::asio::detail

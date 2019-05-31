@@ -27,14 +27,11 @@ io_context::~io_context() {}
 
 io_context::executor_type io_context::get_executor() { return executor_type(*this); }
 
-size_t io_context::run()
+std::size_t io_context::run()
 {
   std::error_code ec;
   auto n = impl_.run(ec);
-  if(ec)
-  {
-    throw ec;
-  }
+  if(ec) { throw ec; }
   return n;
 }
 }  // namespace boost::asio

@@ -13,7 +13,7 @@ class reactor_op : public scheduler_operation
   using perform_func_type = std::function<status(reactor_op*)>;
 
   std::error_code ec_;
-  size_t bytes_transferred_;
+  std::size_t bytes_transferred_;
 
   status perform() { return perform_func_(this); }
 

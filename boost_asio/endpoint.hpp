@@ -10,38 +10,39 @@ class endpoint
  public:
   endpoint()
   {
-    v4.sin_family = AF_INET;
-    v4.sin_port = 0;
-    v4.sin_addr.s_addr = INADDR_ANY;
+    data_.v4.sin_family = AF_INET;
+    data_.v4.sin_port = 0;
+    data_.v4.sin_addr.s_addr = INADDR_ANY;
   }
 
   endpoint(int family, unsigned short port)
   {
-    v4.sin_family = AF_INET;
-    v4.sin_port = ::htons(port);
-    v4.sin_addr.s_addr = INADDR_ANY;
+    data_.v4.sin_family = AF_INET;
+    data_.v4.sin_port = ::htons(port);
+    data_.v4.sin_addr.s_addr = INADDR_ANY;
   }
 
   endpoint(const address& addr, unsigned short port)
   {
-    v4.sin_family = AF_INET;
-    v4.sin_port = ::htons(port);
-    v4.sin_addr = addr.to_v4().get_addr();
+    data_.v4.sin_family = AF_INET;
+    data_.v4.sin_port = ::htons(port);
+    data_.v4.sin_addr = addr.
   }
 
-  bool is_v4() const { return v4.sin_family == AF_INET; }
+  bool is_v4() const { return data_.v4.sin_family == AF_INET; }
 
-  unsigned short port() const { return ::ntohs(v4.sin_port); }
-  void port(unsigned short port) { v4.sin_port = ::htons(port); }
+  unsigned short port() const { return ::ntohs(data_.v4.sin_port); }
+  void port(unsigned short port) { data_.v4.sin_port = ::htons(port); }
 
-  ip::address address() const { return ip::address(address_v4(v4.sin_addr)); }
-  void address(const ip::address& addr) { v4.sin_addr = addr.to_v4().get_addr(); }
+  ip::address address() const { return ip::address(address_v4(data_.v4.sin_addr)); }
+  void address(const ip::address& addr) { data_.v4.sin_addr = addr.to_v4().get_addr(); }
 
  private:
   union {
-    struct sockaddr_in v4;
-    // struct sockaddr_in6 v6;
-  };
+    boost::asio::detail::socket_addr_type base;
+    boost::asio::detail::sockaddr_in4_type v4;
+    boost::asio::detail::sockaddr_in6_type v6;
+  } data_;
 };
 }  // namespace boost::asio::ip::detail
 #endif

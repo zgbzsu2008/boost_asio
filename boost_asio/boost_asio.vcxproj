@@ -77,6 +77,7 @@
   <ItemGroup>
     <ClInclude Include="address.hpp" />
     <ClInclude Include="address_v4.hpp" />
+    <ClInclude Include="address_v6.hpp" />
     <ClInclude Include="associated_allocator.hpp" />
     <ClInclude Include="associated_executor.hpp" />
     <ClInclude Include="async_result.hpp" />
@@ -100,6 +101,8 @@
     <ClInclude Include="noncopyable.hpp" />
     <ClInclude Include="op_queue.hpp" />
     <ClInclude Include="post.hpp" />
+    <ClInclude Include="reactive_socket_service.hpp" />
+    <ClInclude Include="reactive_socket_service_base.hpp" />
     <ClInclude Include="reactor_op.hpp" />
     <ClInclude Include="recycling_allocator.hpp" />
     <ClInclude Include="scheduler.hpp" />
@@ -110,6 +113,7 @@
     <ClInclude Include="service_registry_helpers.hpp" />
     <ClInclude Include="socket_base.hpp" />
     <ClInclude Include="socket_ops.hpp" />
+    <ClInclude Include="socket_types.hpp" />
     <ClInclude Include="stream_socket_service.hpp" />
     <ClInclude Include="system_context.hpp" />
     <ClInclude Include="system_executor.hpp" />
@@ -127,6 +131,7 @@
     <ClCompile Include="scheduler.cc" />
     <ClCompile Include="select_interrupter.cc" />
     <ClCompile Include="service_registry.cc" />
+    <ClCompile Include="socket_ops.cc" />
     <ClCompile Include="system_context.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
