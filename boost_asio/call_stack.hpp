@@ -6,8 +6,7 @@
 
 #include "noncopyable.hpp"
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 template <typename Key, typename Value = unsigned char>
 class call_stack
 {
@@ -30,9 +29,10 @@ class call_stack
 
     Value* next_by_key() const
     {
-      for(context* elem = next_; elem != 0; elem = elem->next_)
-      {
-        if(elem->key_ == key_) { return elem->value_; }
+      for (context* elem = next_; elem != 0; elem = elem->next_) {
+        if (elem->key_ == key_) {
+          return elem->value_;
+        }
       }
       return 0;
     }
@@ -48,9 +48,10 @@ class call_stack
   friend class context;
   static Value* contains(Key* k)
   {
-    for(context* elem = top_; elem != 0; elem = elem->next_)
-    {
-      if(elem->key_ == k) { return elem->value_; }
+    for (context* elem = top_; elem != 0; elem = elem->next_) {
+      if (elem->key_ == k) {
+        return elem->value_;
+      }
     }
     return 0;
   }

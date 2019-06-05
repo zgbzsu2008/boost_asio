@@ -7,8 +7,7 @@
 
 #include "noncopyable.hpp"
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 class thread_group : private noncopyable
 {
  public:
@@ -22,17 +21,17 @@ class thread_group : private noncopyable
 
   void create_threads(const std::function<void()>& func, int num_threads)
   {
-    for(int i = 0; i < num_threads; ++i)
-    {
+    for (int i = 0; i < num_threads; ++i) {
       threads_.push_back(std::thread(func));
     }
   }
 
   void join()
   {
-    for(auto& t : threads_)
-    {
-      if(t.joinable()) { t.joinable(); }
+    for (auto& t : threads_) {
+      if (t.joinable()) {
+        t.joinable();
+      }
     }
   }
 

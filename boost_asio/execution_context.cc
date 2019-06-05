@@ -2,8 +2,7 @@
 
 #include "service_registry.hpp"
 
-namespace boost::asio
-{
+namespace boost::asio {
 execution_context::execution_context() : service_registry_(new detail::service_registry(*this)) {}
 
 execution_context::~execution_context()

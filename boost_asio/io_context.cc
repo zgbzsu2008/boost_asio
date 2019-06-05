@@ -2,10 +2,11 @@
 
 #include <iostream>
 #include <memory>
-#include "service_registry_helpers.hpp"
 
-namespace boost::asio
-{
+#include "service_registry_helpers.hpp"
+#include "throw_error.hpp"
+
+namespace boost::asio {
 io_context::impl_type& io_context::add_impl(io_context::impl_type* impl)
 {
   std::unique_ptr<impl_type> ptr(impl);
@@ -14,14 +15,12 @@ io_context::impl_type& io_context::add_impl(io_context::impl_type* impl)
 }
 
 io_context::io_context()
-  : impl_(add_impl(new impl_type(*this, 1 + std::thread::hardware_concurrency())))
-{
-}
+    : impl_(add_impl(new impl_type(*this, 1 + std::thread::hardware_concurrency())))
+{}
 
 io_context::io_context(int concurrency_hint)
-  : impl_(add_impl(new impl_type(*this, concurrency_hint)))
-{
-}
+    : impl_(add_impl(new impl_type(*this, concurrency_hint)))
+{}
 
 io_context::~io_context() {}
 
@@ -31,7 +30,7 @@ std::size_t io_context::run()
 {
   std::error_code ec;
   auto n = impl_.run(ec);
-  if(ec) { throw ec; }
+  detail::throw_error(ec, ec);
   return n;
 }
 }  // namespace boost::asio

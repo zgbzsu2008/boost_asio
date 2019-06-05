@@ -9,8 +9,7 @@
 #include "scheduler_operation.hpp"
 #include "thread_context.hpp"
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 struct scheduler_thread_info;
 class epoll_reactor;
 
@@ -36,7 +35,9 @@ class scheduler : public execution_context_service_base<scheduler>, public threa
   void compensating_work_started();
   void work_finished()
   {
-    if(--outstanding_work_ == 0) { stop(); }
+    if (--outstanding_work_ == 0) {
+      stop();
+    }
   }
 
   bool can_dispatch() { return thread_call_stack::contains(this) != 0; }

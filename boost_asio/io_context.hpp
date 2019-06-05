@@ -10,8 +10,7 @@
 #include "scheduler.hpp"
 #include "scheduler_operation.hpp"
 
-namespace boost::asio
-{
+namespace boost::asio {
 class io_context : public execution_context
 {
  public:
@@ -77,8 +76,7 @@ class io_context::service : public execution_context::service
   virtual void shutdown() {}
 };
 
-namespace detail
-{
+namespace detail {
 template <typename Type>
 class service_base : public io_context::service
 {
@@ -92,8 +90,7 @@ class service_base : public io_context::service
 template <typename Function, typename Alloc>
 inline void io_context::executor_type::dispatch(Function&& func, const Alloc& a) const
 {
-  if(running_in_this_thread())
-  {
+  if (running_in_this_thread()) {
     detail::fenced_block b(detail::fenced_block::full);
     func();
     return;
@@ -102,7 +99,7 @@ inline void io_context::executor_type::dispatch(Function&& func, const Alloc& a)
   using op = detail::executor_op<Function, Alloc>;
   typename op::ptr p = {std::addressof(a), op::ptr::allocate(a), 0};
 
-  p.p = new(p.v) op(std::move(func), a);
+  p.p = new (p.v) op(std::move(func), a);
   io_context_.impl_.post_immediate_completion(p.p, false);
   p.v = p.p = 0;
 }
@@ -113,7 +110,7 @@ inline void io_context::executor_type::post(Function&& func, const Alloc& a) con
   using op = detail::executor_op<Function, Alloc>;
   typename op::ptr p = {std::addressof(a), op::ptr::allocate(a), 0};
 
-  p.p = new(p.v) op(std::move(func), a);
+  p.p = new (p.v) op(std::move(func), a);
   io_context_.impl_.post_immediate_completion(p.p, false);
   p.v = p.p = 0;
 }
@@ -124,7 +121,7 @@ inline void io_context::executor_type::defer(Function&& func, const Alloc& a) co
   using op = detail::executor_op<Function, Alloc, detail::operation>;
   typename op::ptr p = {std::addressof(a), op::ptr::allocate(a), 0};
 
-  p.p = new(p.v) op(std::move(func), a);
+  p.p = new (p.v) op(std::move(func), a);
   io_context_.impl_.post_immediate_completion(p.p, true);
   p.v = p.p = 0;
 }

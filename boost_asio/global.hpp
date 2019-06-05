@@ -3,8 +3,7 @@
 
 #include <mutex>
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 template <typename T>
 struct global_impl
 {

@@ -5,8 +5,7 @@
 #include "associated_executor.hpp"
 #include "executor_work_guard.hpp"
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 template <typename Handler>
 class work_dispatcher
 {

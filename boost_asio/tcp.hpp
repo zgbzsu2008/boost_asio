@@ -1,13 +1,12 @@
 #ifndef BOOST_ASIO_IP_TCP_HPP
 #define BOOST_ASIO_IP_TCP_HPP
 
-#include <sys/socket.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 #include "basic_endpoint.hpp"
 
-namespace boost::asio::ip
-{
+namespace boost::asio::ip {
 class tcp
 {
  public:

@@ -10,8 +10,7 @@
 #include "execution_context.hpp"
 #include "io_context.hpp"
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 class service_registry
 {
  public:
@@ -42,13 +41,17 @@ inline Service& service_registry::use_service()
 {
   std::string key = Service::key();
   std::unique_lock<std::mutex> lock(mutex_);
-  if(services_.find(key) != services_.end()) { return static_cast<Service&>(*services_[key]); }
+  if (services_.find(key) != services_.end()) {
+    return static_cast<Service&>(*services_[key]);
+  }
 
   lock.unlock();
   std::unique_ptr<Service> new_service(new Service(owner_));
   lock.lock();
 
-  if(services_.find(key) != services_.end()) { return static_cast<Service&>(*services_[key]); }
+  if (services_.find(key) != services_.end()) {
+    return static_cast<Service&>(*services_[key]);
+  }
   services_[key] = new_service.get();
 
   return static_cast<Service&>(*new_service.release());
@@ -59,13 +62,17 @@ inline Service& service_registry::use_service(io_context& ioc)
 {
   std::string key = Service::key();
   std::unique_lock<std::mutex> lock(mutex_);
-  if(services_.find(key) != services_.end()) { return static_cast<Service&>(*services_[key]); }
+  if (services_.find(key) != services_.end()) {
+    return static_cast<Service&>(*services_[key]);
+  }
 
   lock.unlock();
   std::unique_ptr<Service> new_service(new Service(ioc));
   lock.lock();
 
-  if(services_.find(key) != services_.end()) { return static_cast<Service&>(*services_[key]); }
+  if (services_.find(key) != services_.end()) {
+    return static_cast<Service&>(*services_[key]);
+  }
   services_[key] = new_service.get();
 
   return static_cast<Service&>(*new_service.release());

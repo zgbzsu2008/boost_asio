@@ -7,8 +7,7 @@
 #include "system_context.hpp"
 #include "system_executor.hpp"
 
-namespace boost::asio
-{
+namespace boost::asio {
 struct system_context::thread_function
 {
   detail::scheduler* scheduler_;

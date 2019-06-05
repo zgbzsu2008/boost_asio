@@ -1,12 +1,14 @@
 #ifndef BOOST_ASIO_DETAIL_REACTIVE_SOCKET_SERVICE_BASE_HPP
 #define BOOST_ASIO_DETAIL_REACTIVE_SOCKET_SERVICE_BASE_HPP
 
-#include "socket_types.hpp"
-#include "socket_ops.hpp"
+#include "buffer_sequence_adapter.hpp"
 #include "epoll_reactor.hpp"
+#include "reactive_socket_send_op.hpp"
+#include "socket_base.hpp"
+#include "socket_ops.hpp"
+#include "socket_types.hpp"
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 class reactive_socket_service_base
 {
  public:
@@ -44,6 +46,22 @@ class reactive_socket_service_base
     return ec;
   }
 
+  template <typename ConstBufferSequence>
+  std::size_t send(base_implementation_type& impl, const ConstBufferSequence& buffers,
+                   socket_base::message_flags flags, std::error_code& ec)
+  {
+    buffer_sequence_adapter<boost::asio::const_buffer, ConstBufferSequence> bufs(buffers);
+    return socket_ops::sync_send(impl.socket_, impl.state_, bufs.buffers(), bufs.count(), flags,
+                                 bufs.all_empty(), ec);
+  }
+
+  template <typename ConstBufferSequence, typename Handler>
+  void async_send(base_implementation_type& impl, const ConstBufferSequence& buffers,
+                  socket_base::message_flags flags, Handler& handler)
+  {
+    bool is_continuation = false;
+  }
+
  protected:
   std::error_code do_open(base_implementation_type& impl, int af, int type, int protocol,
                           std::error_code& ec);
@@ -55,6 +73,7 @@ class reactive_socket_service_base
 
   void start_connect_op(base_implementation_type& impl, reactor_op* op, bool is_continuation,
                         const socket_addr_type* addr, size_t addrlen);
+
   io_context& io_context_;
   epoll_reactor& reactor_;
 };

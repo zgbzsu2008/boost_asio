@@ -11,12 +11,18 @@
 
 struct epoll_event;
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 class epoll_reactor : public execution_context_service_base<epoll_reactor>
 {
  public:
-  enum op_types { read_op = 0, write_op = 1, connect_op = 1, except_op = 2, max_ops = 3 };
+  enum op_types
+  {
+    read_op = 0,
+    write_op = 1,
+    connect_op = 1,
+    except_op = 2,
+    max_ops = 3
+  };
 
   class descriptor_state : operation
   {
@@ -38,6 +44,7 @@ class epoll_reactor : public execution_context_service_base<epoll_reactor>
     static void do_complete(void* owner, operation* base, const std::error_code& ec,
                             std::size_t bytes_transferred);
   };
+
   using pre_descriptor_data = descriptor_state*;
   using socket_type = int;
 

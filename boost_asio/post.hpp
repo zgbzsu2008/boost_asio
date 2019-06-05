@@ -7,8 +7,7 @@
 #include "execution_context.hpp"
 #include "work_dispatcher.hpp"
 
-namespace boost::asio
-{
+namespace boost::asio {
 template <typename T>
 typename detail::async_result_helper<T, void()>::return_type post(T&& token)
 {
@@ -23,8 +22,8 @@ typename detail::async_result_helper<T, void()>::return_type post(T&& token)
 }
 
 template <typename T, typename E>
-typename detail::async_result_helper<T, void()>::return_type
-post(E& ex, T&& token, typename std::enable_if<detail::is_executor<E>::value>::type* = 0)
+typename detail::async_result_helper<T, void()>::return_type post(
+    E& ex, T&& token, typename std::enable_if<detail::is_executor<E>::value>::type* = 0)
 {
   using handler = typename detail::async_result_helper<T, void()>::handler_type;
   async_completion<T, void()> init(std::forward<T>(token));
@@ -34,9 +33,9 @@ post(E& ex, T&& token, typename std::enable_if<detail::is_executor<E>::value>::t
 }
 
 template <typename T, typename E>
-typename detail::async_result_helper<T, void()>::return_type
-post(E& ctx, T&& token,
-     typename std::enable_if<std::is_convertible<E&, execution_context&>::value>::type* = 0)
+typename detail::async_result_helper<T, void()>::return_type post(
+    E& ctx, T&& token,
+    typename std::enable_if<std::is_convertible<E&, execution_context&>::value>::type* = 0)
 {
   using handler = typename detail::async_result_helper<T, void()>::handler_type;
   async_completion<T, void()> init(token);

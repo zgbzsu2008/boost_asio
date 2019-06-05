@@ -5,8 +5,7 @@
 #include "scheduler.hpp"
 #include "thread_group.hpp"
 
-namespace boost::asio
-{
+namespace boost::asio {
 class system_executor;
 class system_context : public execution_context
 {

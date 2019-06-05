@@ -3,8 +3,7 @@
 
 #include "io_context.hpp"
 
-namespace boost::asio
-{
+namespace boost::asio {
 template <typename Protocol>
 class stream_socket_service : public detail::service_base<stream_socket_service<Protocol>>
 {

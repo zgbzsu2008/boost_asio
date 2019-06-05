@@ -5,8 +5,7 @@
 #include "endpoint.hpp"
 #include "tcp.hpp"
 
-namespace boost::asio::ip
-{
+namespace boost::asio::ip {
 template <typename T>
 class basic_endpoint
 {
@@ -15,8 +14,7 @@ class basic_endpoint
 
   basic_endpoint() : impl_() {}
   basic_endpoint(const protocol_type& protocol, unsigned short port) : impl_(protocol.family, port)
-  {
-  }
+  {}
   basic_endpoint(const address& addr, unsigned short port) : impl_(addr, port) {}
 
   protocol_type protocol() const { return protocol_type::v4(); }

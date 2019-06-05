@@ -7,11 +7,10 @@
 
 #include "executor_op.hpp"
 #include "global.hpp"
-#include "system_context.hpp"
 #include "handler_invoke_helpers.hpp"
+#include "system_context.hpp"
 
-namespace boost::asio
-{
+namespace boost::asio {
 class system_executor
 {
  public:
@@ -42,7 +41,7 @@ inline void system_executor::post(Function&& func, const Alloc& a) const
 {
   using op = detail::executor_op<typename std::decay<Function>::type, Alloc>;
   typename op::ptr p = {std::addressof(a), op::ptr::allocate(a), 0};
-  p.p = new(p.v) op(std::move(func), a);
+  p.p = new (p.v) op(std::move(func), a);
 
   system_context& ctx = detail::global<system_context>();
   ctx.scheduler_.post_immediate_completion(p.p, false);
@@ -54,7 +53,7 @@ inline void system_executor::defer(Function&& func, const Alloc& a) const
 {
   using op = detail::executor_op<typename std::decay<Function>::type, Alloc>;
   typename op::ptr p = {std::addressof(a), op::ptr::allocate(a), 0};
-  p.p = new(p.v) op(std::move(func), a);
+  p.p = new (p.v) op(std::move(func), a);
 
   system_context& ctx = detail::global<system_context>();
   ctx.scheduler_.post_immediate_completion(p.p, true);

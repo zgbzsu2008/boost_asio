@@ -1,6 +1,6 @@
 #include <chrono>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 #include "epoll_reactor.hpp"
 #include "io_context.hpp"
@@ -32,8 +32,7 @@ int main()
   post(ioc, std::bind(init_task, std::ref(ioc)));
 
   std::this_thread::sleep_for(std::chrono::seconds(1));
-  for(int i = 0; i < 100; ++i)
-  {
+  for (int i = 0; i < 100; ++i) {
     post(ioc, std::bind(print, i));
   }
 

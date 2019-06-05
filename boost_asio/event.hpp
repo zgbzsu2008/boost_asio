@@ -9,8 +9,7 @@
 
 #include "noncopyable.hpp"
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 class event : private noncopyable
 {
  public:
@@ -30,7 +29,9 @@ class event : private noncopyable
     state_ |= 1;
     bool have_waiters = (state_ > 1);
     lock.unlock();
-    if(have_waiters) { cond_.notify_one(); }
+    if (have_waiters) {
+      cond_.notify_one();
+    }
   }
 
   bool maybe_unlock_and_signal_one(std::unique_lock<std::mutex>& lock)
@@ -38,8 +39,7 @@ class event : private noncopyable
     assert(lock.owns_lock());
     state_ |= 1;
     bool have_waiters = (state_ > 1);
-    if(have_waiters)
-    {
+    if (have_waiters) {
       lock.unlock();
       cond_.notify_one();
       return true;
@@ -57,8 +57,7 @@ class event : private noncopyable
   void wait(std::unique_lock<std::mutex>& lock)
   {
     assert(lock.owns_lock());
-    while((state_ & 1) == 0)
-    {
+    while ((state_ & 1) == 0) {
       waiter w(state_);
       cond_.wait(lock);
     }
@@ -67,8 +66,7 @@ class event : private noncopyable
   bool wait_for_usec(std::unique_lock<std::mutex>& lock, long usec)
   {
     assert(lock.owns_lock());
-    while((state_ & 1) == 0)
-    {
+    while ((state_ & 1) == 0) {
       waiter w(state_);
       cond_.wait_for(lock, std::chrono::microseconds(usec));
     }

@@ -3,8 +3,8 @@
 
 #include "handler_invoke_hook.hpp"
 
-namespace boost_asio_handler_invoke_helpers
-{
+namespace boost_asio_handler_invoke_helpers {
+
 template <typename Function, typename Context>
 inline void invoke(Function& function, Context& context)
 {
@@ -18,5 +18,6 @@ inline void invoke(const Function& function, Context& context)
   using boost::asio::asio_handler_invoke;
   asio_handler_invoke(function, std::addressof(context));
 }
+
 }  // namespace boost_asio_handler_invoke_helpers
 #endif

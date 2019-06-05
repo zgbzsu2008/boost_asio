@@ -4,8 +4,7 @@
 #include "io_context.hpp"
 #include "service_registry_helpers.hpp"
 
-namespace boost::asio
-{
+namespace boost::asio {
 template <typename IoObjectService>
 class basic_io_object
 {

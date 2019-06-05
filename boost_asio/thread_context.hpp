@@ -4,8 +4,7 @@
 #include "call_stack.hpp"
 #include "thread_info_base.hpp"
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 class thread_context
 {
  public:

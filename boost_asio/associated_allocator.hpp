@@ -13,8 +13,7 @@ class myClass
   myAllocator get_allocator();
 };
 */
-namespace boost::asio
-{
+namespace boost::asio {
 template <typename, typename E, typename = std::void_t<>>
 struct associated_allocator : std::false_type
 {
@@ -30,13 +29,10 @@ struct associated_allocator<T, E, std::void_t<typename T::allocator_type>> : std
 template <typename T, typename Alloc = std::allocator<void>>
 auto get_associated_allocator(const T& t, const Alloc& a = Alloc())
 {
-  if constexpr(associated_allocator<T, Alloc>::value)
-  {
+  if constexpr (associated_allocator<T, Alloc>::value) {
     static_assert(std::is_member_function_pointer<decltype(&T::get_allocator)>::value);
     return t.get_allocator();
-  }
-  else
-  {
+  } else {
     return a;
   }
 }

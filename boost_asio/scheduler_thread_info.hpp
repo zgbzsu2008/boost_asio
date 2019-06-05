@@ -4,8 +4,7 @@
 #include "op_queue.hpp"
 #include "thread_info_base.hpp"
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 class scheduler;
 class scheduler_operation;
 struct scheduler_thread_info : public thread_info_base

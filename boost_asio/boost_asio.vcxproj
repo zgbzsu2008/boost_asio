@@ -85,6 +85,8 @@
     <ClInclude Include="basic_io_object.hpp" />
     <ClInclude Include="basic_socket.hpp" />
     <ClInclude Include="basic_stream_socket.hpp" />
+    <ClInclude Include="buffer.hpp" />
+    <ClInclude Include="buffer_sequence_adapter.hpp" />
     <ClInclude Include="call_stack.hpp" />
     <ClInclude Include="endpoint.hpp" />
     <ClInclude Include="epoll_reactor.hpp" />
@@ -94,6 +96,8 @@
     <ClInclude Include="executor_work_guard.hpp" />
     <ClInclude Include="fenced_block.hpp" />
     <ClInclude Include="global.hpp" />
+    <ClInclude Include="handler_alloc_helpers.hpp" />
+    <ClInclude Include="handler_alloc_hook.hpp" />
     <ClInclude Include="handler_invoke_helpers.hpp" />
     <ClInclude Include="handler_invoke_hook.hpp" />
     <ClInclude Include="io_context.hpp" />
@@ -101,6 +105,7 @@
     <ClInclude Include="noncopyable.hpp" />
     <ClInclude Include="op_queue.hpp" />
     <ClInclude Include="post.hpp" />
+    <ClInclude Include="reactive_socket_send_op.hpp" />
     <ClInclude Include="reactive_socket_service.hpp" />
     <ClInclude Include="reactive_socket_service_base.hpp" />
     <ClInclude Include="reactor_op.hpp" />
@@ -121,6 +126,7 @@
     <ClInclude Include="thread_context.hpp" />
     <ClInclude Include="thread_group.hpp" />
     <ClInclude Include="thread_info_base.hpp" />
+    <ClInclude Include="throw_error.hpp" />
     <ClInclude Include="work_dispatcher.hpp" />
   </ItemGroup>
   <ItemGroup>

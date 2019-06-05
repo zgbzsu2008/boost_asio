@@ -5,8 +5,7 @@
 #include "io_context.hpp"
 #include "service_registry.hpp"
 
-namespace boost::asio
-{
+namespace boost::asio {
 template <typename Service>
 Service& use_service(execution_context& e)
 {

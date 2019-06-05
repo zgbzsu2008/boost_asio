@@ -7,10 +7,8 @@
 
 #include "noncopyable.hpp"
 
-namespace boost::asio
-{
-namespace detail
-{
+namespace boost::asio {
+namespace detail {
 class service_registry;
 }
 class execution_context : private detail::noncopyable
@@ -58,8 +56,7 @@ class execution_context::service : private detail::noncopyable
   execution_context& owner_;
 };
 
-namespace detail
-{
+namespace detail {
 template <typename Type>
 class execution_context_service_base : public execution_context::service
 {

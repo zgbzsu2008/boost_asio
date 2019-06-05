@@ -6,8 +6,7 @@
 #include <list>
 #include <queue>
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 template <typename T>
 class op_queue : public std::queue<T*, std::list<T*>>
 {
@@ -19,8 +18,7 @@ class op_queue : public std::queue<T*, std::list<T*>>
   template <typename U>
   void push(op_queue<U>& q)
   {
-    while(auto v = q.front())
-    {
+    while (auto v = q.front()) {
       this->push(v);
     }
   }

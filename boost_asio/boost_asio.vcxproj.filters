@@ -91,6 +91,18 @@
     <ClInclude Include="address_v6.hpp">
       <Filter>tcp</Filter>
     </ClInclude>
+    <ClInclude Include="throw_error.hpp" />
+    <ClInclude Include="buffer_sequence_adapter.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="buffer.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="reactive_socket_send_op.hpp">
+      <Filter>tcp</Filter>
+    </ClInclude>
+    <ClInclude Include="handler_alloc_helpers.hpp" />
+    <ClInclude Include="handler_alloc_hook.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="tcp">

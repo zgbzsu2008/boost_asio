@@ -1,8 +1,7 @@
 #ifndef BOOST_ASIO_DETAIL_SELECT_INTERRUPTER_HPP
 #define BOOST_ASIO_DETAIL_SELECT_INTERRUPTER_HPP
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 class select_interrupter
 {
  public:

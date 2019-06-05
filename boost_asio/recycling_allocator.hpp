@@ -5,8 +5,7 @@
 #include "thread_context.hpp"
 #include "thread_info_base.hpp"
 
-namespace boost::asio::detail
-{
+namespace boost::asio::detail {
 template <typename T>
 class recycling_allocator
 {
@@ -22,8 +21,7 @@ class recycling_allocator
   recycling_allocator(){};
   template <typename U>
   recycling_allocator(const recycling_allocator<U>&)
-  {
-  }
+  {}
 
   T* allocate(std::size_t n)
   {
@@ -53,8 +51,7 @@ class recycling_allocator<void>
   recycling_allocator(){};
   template <typename U>
   recycling_allocator(const recycling_allocator<U>&)
-  {
-  }
+  {}
 };
 
 template <typename Alloc>
